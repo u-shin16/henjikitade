@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}404 - {{ APP_NAME }}{% endblock %}
+{% block body %}
+<div class="error-page">
+  <h1>404</h1>
+  <p>{{ message or "ページが見つかりませんでした" }}</p>
+  <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">受信箱へ戻る</a>
+</div>
+{% endblock %}

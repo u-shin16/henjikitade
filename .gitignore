@@ -1,0 +1,14 @@
+.venv/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+instance/
+.DS_Store
+firebase-service-account.json
+*firebase-service-account*.json
+*service-account*.json
+client_secret*.json
+credentials*.json
+token*.json

@@ -1,0 +1,11 @@
+Flask
+gunicorn
+python-dotenv
+firebase-admin
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+Flask-WTF
+requests
+cryptography
