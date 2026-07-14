@@ -1,7 +1,8 @@
 """受信箱(複数フォーム横断の回答一覧)の取得と絞り込み。
 
-フォームID・対応状況・未読既読・重要・回答期間はRepository側
-(Firestoreクエリ)で絞り込み、文字列検索はFlask側で行う。
+フォームID・対応状況・未読既読・重要・回答期間・文字列検索はFlask側で行う。
+Firestoreではフォームごとの回答一覧だけを取得し、複合インデックス不足で
+受信箱が開けなくなるのを避ける。
 将来的に全文検索サービスへ移行する場合は_apply_text_filterを
 差し替えられる構成にしている。
 """
@@ -59,13 +60,6 @@ def parse_filters(args):
     return filters
 
 
-def _has_structured_filter(filters):
-    return any(
-        filters[key] is not None
-        for key in ("status", "is_read", "is_important", "date_from", "date_to")
-    )
-
-
 def get_inbox(user_id, form_repo, response_repo, filters):
     """絞り込み済みの回答一覧と、全体の件数集計を返す。"""
     active_forms = form_repo.get_forms(user_id, active_only=True)
@@ -83,24 +77,11 @@ def get_inbox(user_id, form_repo, response_repo, filters):
         )
     counts = count_service.summarize_responses(all_responses)
 
-    # 一覧用: 構造的な絞り込みはFirestoreクエリで行う
-    if _has_structured_filter(filters) or filters["form_id"]:
-        listed = []
-        for form_id in target_form_ids:
-            listed.extend(
-                response_repo.list_for_form(
-                    user_id,
-                    form_id,
-                    status=filters["status"],
-                    is_read=filters["is_read"],
-                    is_important=filters["is_important"],
-                    date_from=filters["date_from"],
-                    date_to=filters["date_to"],
-                    order_desc=filters["order_desc"],
-                )
-            )
-    else:
-        listed = list(all_responses)
+    listed = [
+        r for r in all_responses
+        if r.get("form_id") in target_form_ids
+    ]
+    listed = _apply_structured_filters(listed, filters)
 
     # 文字列検索はFlask側で絞り込む(MVPでは外部全文検索を使わない)
     if filters["query"]:
@@ -127,6 +108,27 @@ def get_inbox(user_id, form_repo, response_repo, filters):
     return {"responses": items, "counts": counts, "forms": forms_summary}
 
 
+def _apply_structured_filters(responses, filters):
+    results = []
+    for r in responses:
+        if filters["status"] is not None and r.get("status") != filters["status"]:
+            continue
+        if filters["is_read"] is not None and bool(r.get("is_read")) != filters["is_read"]:
+            continue
+        if filters["is_important"] is not None and bool(r.get("is_important")) != filters["is_important"]:
+            continue
+
+        submitted = _as_datetime(r.get("submitted_at"))
+        if filters["date_from"] is not None:
+            if submitted is None or submitted < _as_utc(filters["date_from"]):
+                continue
+        if filters["date_to"] is not None:
+            if submitted is None or submitted > _as_utc(filters["date_to"]):
+                continue
+        results.append(r)
+    return results
+
+
 def _apply_text_filter(responses, query):
     results = []
     for r in responses:
@@ -137,6 +139,25 @@ def _apply_text_filter(responses, query):
         if query in haystack:
             results.append(r)
     return results
+
+
+def _as_datetime(value):
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return _as_utc(value)
+    if isinstance(value, str):
+        try:
+            return _as_utc(datetime.fromisoformat(value.replace("Z", "+00:00")))
+        except ValueError:
+            return None
+    return None
+
+
+def _as_utc(value):
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
 
 
 def _iso(value):
