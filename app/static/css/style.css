@@ -141,7 +141,12 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
   flex-shrink: 0;
 }
 .header-left { display: flex; align-items: center; gap: 10px; }
-.app-logo { font-size: 20px; }
+.app-logo-img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
 .app-name { font-size: 17px; font-weight: 700; color: var(--accent); }
 .back-link { text-decoration: none; font-size: 13px; }
 .header-right { display: flex; align-items: center; gap: 14px; }
@@ -620,7 +625,14 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
   padding: 36px 32px;
   text-align: center;
 }
-.login-logo { font-size: 40px; }
+.login-logo-img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  margin: 0 auto 10px;
+  box-shadow: 0 8px 18px rgba(38, 33, 46, 0.16);
+}
 .login-title { font-size: 26px; color: var(--accent); margin: 6px 0; }
 .login-description { color: var(--text-sub); font-size: 13px; margin-bottom: 22px; }
 .google-login-btn {
