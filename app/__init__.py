@@ -4,7 +4,7 @@ from flask import Flask, jsonify, render_template, request
 from flask_wtf.csrf import CSRFError
 
 from .config import Config
-from .constants import APP_DESCRIPTION, APP_NAME, STATUS_LABELS
+from .constants import APP_DESCRIPTION, APP_NAME, CONTACT_FORM_URL, STATUS_LABELS
 from .extensions import csrf
 
 logging.basicConfig(
@@ -51,6 +51,7 @@ def create_app():
         return {
             "APP_NAME": APP_NAME,
             "APP_DESCRIPTION": APP_DESCRIPTION,
+            "CONTACT_FORM_URL": CONTACT_FORM_URL,
             "STATUS_LABELS": STATUS_LABELS,
             "MOCK_MODE": app.config.get("MOCK_MODE", False),
         }

@@ -19,5 +19,6 @@ STATUS_LABELS = {
 
 APP_NAME = "返事きたで"
 APP_DESCRIPTION = "複数のGoogleフォームに届いた問い合わせを、一括確認・対応管理できるWebアプリ"
+CONTACT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdc3SyLDf1-f4S12V2rF2li5nifiTRDOWxljn6VJl_ezYfZew/viewform?usp=publish-editor"
 
 ADMIN_MEMO_MAX_LENGTH = 2000

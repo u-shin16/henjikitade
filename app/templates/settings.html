@@ -7,6 +7,9 @@
       <a href="{{ url_for('dashboard.index') }}" class="back-link">← 受信箱へ</a>
       <span class="app-name">設定</span>
     </div>
+    <div class="header-right">
+      <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener" class="sidebar-link">お問い合わせ</a>
+    </div>
   </header>
 
   <div class="page-body page-narrow">
@@ -53,6 +56,11 @@
       <h2>メンテナンス</h2>
       <p>未読・未対応などの件数表示が実際と合わない場合は、件数を数え直すことができます。</p>
       <button id="recalculate-btn" class="btn btn-primary">件数を再計算する</button>
+    </div>
+
+    <div class="settings-card">
+      <h2>お問い合わせ</h2>
+      <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener" class="btn btn-ghost">問い合わせフォームを開く</a>
     </div>
   </div>
 </div>
