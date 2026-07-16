@@ -12,6 +12,9 @@ class ManagedFormRepository:
     def _col(self, user_id):
         return get_db().collection("users").document(user_id).collection("managed_forms")
 
+    def _watch_routes_col(self):
+        return get_db().collection("form_watch_routes")
+
     def get_forms(self, user_id, active_only=False):
         forms = []
         for snap in self._col(user_id).stream():
@@ -67,3 +70,27 @@ class ManagedFormRepository:
         fields["updated_at"] = _now()
         doc.update(fields)
         return True
+
+    def save_watch_route(self, user_id, form_id, watch_id):
+        """Pub/Sub通知のwatchIdから所有ユーザーとフォームへ戻れるように保存する。"""
+        if not watch_id:
+            return False
+        now = _now()
+        self._watch_routes_col().document(watch_id).set({
+            "watch_id": watch_id,
+            "user_id": user_id,
+            "form_id": form_id,
+            "event_type": "RESPONSES",
+            "updated_at": now,
+        }, merge=True)
+        return True
+
+    def get_watch_route(self, watch_id):
+        if not watch_id:
+            return None
+        snap = self._watch_routes_col().document(watch_id).get()
+        if not snap.exists:
+            return None
+        data = snap.to_dict() or {}
+        data["watch_id"] = snap.id
+        return data

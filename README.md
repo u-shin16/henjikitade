@@ -25,7 +25,8 @@
 - 重要マーク
 - 管理者用メモ(自動保存)
 - 検索と絞り込み(フォーム・状況・未読・重要・期間・キーワード)
-- 自動同期・手動同期(responseIdによる重複登録防止。既読状態やメモは同期で上書きされない)
+- Google Forms push通知 + 画面へのリアルタイム反映(Server-Sent Events)
+- 手動同期(responseIdによる重複登録防止。既読状態やメモは同期で上書きされない)
 - モックモード(Google API・Firebase未設定でもUI確認可能)
 
 ## 画面構成
@@ -46,6 +47,7 @@
 - データベース: Firebase Cloud Firestore(Firebase Admin SDK for Python)
 - 認証: Google OAuth 2.0
 - Google API: Google Drive API(フォーム一覧)/ Google Forms API(フォーム情報・回答)
+- リアルタイム通知: Google Forms Watches API / Cloud Pub/Sub / Server-Sent Events
 - CSRF対策: Flask-WTF
 - 本番環境: Ubuntu VPS + Gunicorn + Nginx
 
@@ -121,7 +123,7 @@ http://localhost:5000 を開き、「Googleでログイン」を押すとモッ�
 - Firebase・Google Drive API・Google Forms APIへ一切接続しない
 - ダミーのフォーム3件と問い合わせ(未読・既読・各対応状況・重要・メモあり等)を表示
 - ステータス変更・既読・重要・メモの操作をUI上で確認できる
-- 受信箱を開くと自動同期で初回のみ新しい回答が1件追加される(「回答を更新」でも確認可能)
+- 「回答を更新」を押すと初回のみ新しい回答が1件追加される
 
 本番モードとテンプレートは共通で、データ取得部分(Repository)だけが切り替わります。
 
@@ -196,6 +198,53 @@ GOOGLE_REDIRECT_URI=http://localhost:5000/auth/callback
 MOCK_MODE=false
 ```
 
+## リアルタイム更新の設定(Cloud Pub/Sub)
+
+Googleフォームの回答をポーリングせずに受け取るには、Google Forms Watches APIとCloud Pub/Subを使います。
+
+### Cloud Pub/Subの準備
+
+1. Google Cloud Consoleで **Cloud Pub/Sub API** を有効化
+2. Pub/Sub topicを作成(例: `google-forms-responses`)
+3. topicへForms通知サービスアカウントのPublish権限を付与
+
+付与するメンバー:
+
+```
+serviceAccount:forms-notifications@system.gserviceaccount.com
+```
+
+付与するロール:
+
+```
+Pub/Sub Publisher
+```
+
+### Push subscriptionの作成
+
+Pub/Sub subscriptionはpush配信で作成し、エンドポイントを以下にします。
+
+```
+https://あなたのドメイン/api/pubsub/forms?token=十分に長いランダム文字列
+```
+
+`.env`へ同じ値を設定します。
+
+```
+GOOGLE_FORMS_PUBSUB_TOPIC=projects/your-project-id/topics/google-forms-responses
+GOOGLE_FORMS_PUBSUB_PUSH_TOKEN=十分に長いランダム文字列
+```
+
+受信箱を開いた時、またはフォームを管理対象へ追加・再開した時に、各フォームへ `RESPONSES` watchを作成します。Googleから通知が届いたら、このアプリが対象フォームだけを同期し、開いている受信箱へServer-Sent Eventsで更新を流します。
+
+### watchの期限更新
+
+Google Formsのwatchは7日で期限切れになります。受信箱を開いた時にも更新しますが、常時アンテナを維持するため、本番では1日1回程度このコマンドをcronやsystemd timerで実行してください。
+
+```bash
+.venv/bin/flask --app run:app ensure-response-watches
+```
+
 ## 使用するGoogle APIスコープ
 
 必要最小限の読み取り専用スコープのみ要求します(フォームの作成・編集・削除の権限は要求しません)。
@@ -223,7 +272,12 @@ users/{userId}/private/oauth_token
 users/{userId}/managed_forms/{formId}
   google_form_id, title, is_active,
   response_count, unread_count, unhandled_count,
-  last_synced_at, created_at, updated_at
+  last_synced_at,
+  response_watch_id, response_watch_expire_at, response_watch_state,
+  created_at, updated_at
+
+form_watch_routes/{watchId}
+  watch_id, user_id, form_id, event_type, updated_at
 
 users/{userId}/managed_forms/{formId}/responses/{responseId}
   google_response_id, respondent_email, respondent_name,
@@ -284,6 +338,8 @@ FLASK_ENV=production
 APP_BASE_URL=https://あなたのドメイン
 GOOGLE_REDIRECT_URI=https://あなたのドメイン/auth/callback
 FIREBASE_CREDENTIALS_PATH=/var/www/mitokiya/secrets/firebase-service-account.json
+GOOGLE_FORMS_PUBSUB_TOPIC=projects/your-project-id/topics/google-forms-responses
+GOOGLE_FORMS_PUBSUB_PUSH_TOKEN=十分に長いランダム文字列
 MOCK_MODE=false
 SESSION_COOKIE_SECURE=true
 ```
@@ -291,8 +347,10 @@ SESSION_COOKIE_SECURE=true
 ### Gunicornでの起動
 
 ```bash
-.venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8003 run:app
+.venv/bin/gunicorn --workers 1 --worker-class gthread --threads 8 --bind 127.0.0.1:8003 run:app
 ```
+
+Server-Sent Eventsの接続とPub/Sub通知を同じプロセス内のイベントブローカーでつなぐため、Redis等を追加しない構成では `--workers 1` を推奨します。接続数は `--threads` で増やします。
 
 ※ポート8003が既存アプリと重複していないか `sudo ss -tlnp | grep 8003` で確認してください。
 
@@ -310,7 +368,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=/var/www/mitokiya
 EnvironmentFile=/var/www/mitokiya/.env
-ExecStart=/var/www/mitokiya/.venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8003 run:app
+ExecStart=/var/www/mitokiya/.venv/bin/gunicorn --workers 1 --worker-class gthread --threads 8 --bind 127.0.0.1:8003 run:app
 Restart=always
 
 [Install]
@@ -320,6 +378,12 @@ WantedBy=multi-user.target
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now mitokiya
+```
+
+watch期限更新をcronで実行する例:
+
+```cron
+15 3 * * * cd /var/www/mitokiya && .venv/bin/flask --app run:app ensure-response-watches >> /var/log/mitokiya-watch-renew.log 2>&1
 ```
 
 ### Nginxの設定例
@@ -337,6 +401,8 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_read_timeout 3600;
     }
 }
 ```

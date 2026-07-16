@@ -30,3 +30,36 @@ def list_all_responses(credentials, form_id):
         if not page_token:
             break
     return responses
+
+
+def create_response_watch(credentials, form_id, topic_name):
+    """回答イベントをPub/Sub topicへ送るwatchを作成する。"""
+    body = {
+        "watch": {
+            "target": {
+                "topic": {
+                    "topicName": topic_name,
+                },
+            },
+            "eventType": "RESPONSES",
+        },
+    }
+    return _service(credentials).forms().watches().create(
+        formId=form_id,
+        body=body,
+    ).execute()
+
+
+def renew_watch(credentials, form_id, watch_id):
+    """既存watchの期限を延長する。"""
+    return _service(credentials).forms().watches().renew(
+        formId=form_id,
+        watchId=watch_id,
+    ).execute()
+
+
+def list_watches(credentials, form_id):
+    """フォームに作成済みのwatch一覧を取得する。"""
+    return _service(credentials).forms().watches().list(
+        formId=form_id,
+    ).execute().get("watches", [])

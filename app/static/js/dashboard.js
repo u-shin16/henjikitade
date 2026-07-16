@@ -4,10 +4,6 @@
  * すべてfetch APIで行い、ページ全体の再読み込みをしない。
  */
 (() => {
-  const AUTO_SYNC_INTERVAL_MS = 30000;
-  const AUTO_SYNC_INITIAL_DELAY_MS = 1500;
-  const AUTO_SYNC_RESUME_DELAY_MS = 1000;
-
   const STATUS_LABELS = {
     unhandled: "未対応",
     in_progress: "対応中",
@@ -28,8 +24,8 @@
     selectedKey: null, // `${formId}/${responseId}`
     loading: false,
     syncing: false,
-    autoSyncTimer: null,
-    autoSyncErrorShown: false,
+    events: null,
+    realtimeErrorShown: false,
   };
 
   const el = {
@@ -157,7 +153,7 @@
 
   // --- 同期 ---
 
-  function setSyncButtonState(isSyncing, mode = "manual") {
+  function setSyncButtonState(isSyncing) {
     el.syncBtn.disabled = isSyncing;
     el.syncBtn.classList.toggle("syncing", isSyncing);
     const label = el.syncBtn.querySelector(".sync-label");
@@ -165,36 +161,21 @@
     if (!isSyncing) {
       label.textContent = "回答を更新";
     } else {
-      label.textContent = mode === "auto" ? "自動更新中" : "回答を取得しています";
+      label.textContent = "回答を取得しています";
     }
   }
 
-  async function syncInbox({ manual = false } = {}) {
+  async function syncInbox() {
     if (state.syncing) return null;
 
     state.syncing = true;
-    setSyncButtonState(true, manual ? "manual" : "auto");
+    setSyncButtonState(true);
 
     try {
       const result = await Api.post("/api/sync");
-      const newCount = result.data?.new_count ?? 0;
-      const failedForms = result.data?.failed_forms ?? 0;
-
-      if (manual) {
-        showToast(result.message, result.success ? "success" : "error", 5000);
-      } else if (result.success && newCount > 0) {
-        showToast(result.message, failedForms > 0 ? "error" : "success", 5000);
-        state.autoSyncErrorShown = failedForms > 0;
-      } else if (result.success && failedForms > 0 && !state.autoSyncErrorShown) {
-        showToast(result.message, "error", 5000);
-        state.autoSyncErrorShown = true;
-      } else if (!result.success && !state.autoSyncErrorShown) {
-        showToast(result.message || "自動更新に失敗しました", "error", 5000);
-        state.autoSyncErrorShown = true;
-      }
+      showToast(result.message, result.success ? "success" : "error", 5000);
 
       if (result.success) {
-        if (failedForms === 0) state.autoSyncErrorShown = false;
         await loadInbox({ quiet: true });
       } else if (result.data && result.data.need_login) {
         setTimeout(() => { window.location.href = "/login"; }, 1500);
@@ -207,41 +188,47 @@
     }
   }
 
-  function clearAutoSyncTimer() {
-    if (state.autoSyncTimer) {
-      clearTimeout(state.autoSyncTimer);
-      state.autoSyncTimer = null;
+  async function ensureRealtimeWatches() {
+    const result = await Api.post("/api/forms/watches/ensure");
+    if (!result.success && result.data && result.data.need_login) {
+      setTimeout(() => { window.location.href = "/login"; }, 1500);
     }
+    return result;
   }
 
-  function scheduleAutoSync(delay = AUTO_SYNC_INTERVAL_MS) {
-    clearAutoSyncTimer();
-    if (document.visibilityState === "hidden") return;
-    state.autoSyncTimer = setTimeout(runAutoSync, delay);
-  }
+  function startRealtimeUpdates() {
+    if (!window.EventSource) return;
+    if (state.events) state.events.close();
 
-  async function runAutoSync() {
-    if (document.visibilityState === "hidden") return;
-    try {
-      await syncInbox({ manual: false });
-    } finally {
-      scheduleAutoSync();
-    }
-  }
+    const source = new EventSource("/api/events");
+    state.events = source;
 
-  function startAutoSync() {
-    scheduleAutoSync(AUTO_SYNC_INITIAL_DELAY_MS);
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") {
-        clearAutoSyncTimer();
-      } else {
-        scheduleAutoSync(AUTO_SYNC_RESUME_DELAY_MS);
+    source.addEventListener("open", () => {
+      state.realtimeErrorShown = false;
+    });
+    source.addEventListener("inbox", async (event) => {
+      let data = {};
+      try {
+        data = JSON.parse(event.data || "{}");
+      } catch (e) {
+        return;
+      }
+      await loadInbox({ quiet: true });
+      if (data.new_count > 0 || data.failed_forms > 0) {
+        showToast(
+          data.message || "受信箱を更新しました",
+          data.failed_forms > 0 ? "error" : "success",
+          5000
+        );
       }
     });
-
-    window.addEventListener("online", () => {
-      scheduleAutoSync(AUTO_SYNC_RESUME_DELAY_MS);
+    source.addEventListener("error", () => {
+      if (state.realtimeErrorShown) return;
+      showToast("リアルタイム更新の接続が切れました。再接続します", "error", 5000);
+      state.realtimeErrorShown = true;
+    });
+    window.addEventListener("beforeunload", () => {
+      source.close();
     });
   }
 
@@ -556,10 +543,11 @@
   // 手動同期(連続クリック防止・進行状況表示)
   el.syncBtn.addEventListener("click", async () => {
     if (el.syncBtn.disabled) return;
-    clearAutoSyncTimer();
-    await syncInbox({ manual: true });
-    scheduleAutoSync();
+    await syncInbox();
   });
 
-  loadInbox().finally(startAutoSync);
+  loadInbox().finally(() => {
+    startRealtimeUpdates();
+    ensureRealtimeWatches();
+  });
 })();

@@ -57,6 +57,7 @@ def create_app():
         }
 
     _register_error_handlers(app)
+    _register_cli(app)
 
     return app
 
@@ -98,3 +99,19 @@ def _register_error_handlers(app):
         if _is_api_request():
             return jsonify({"success": False, "message": "サーバーでエラーが発生しました。時間を空けて再度お試しください"}), 500
         return render_template("errors/500.html"), 500
+
+
+def _register_cli(app):
+    @app.cli.command("ensure-response-watches")
+    def ensure_response_watches_command():
+        """管理対象フォームのGoogle Forms watchを作成・更新する。"""
+        from app.forms import watch_service
+
+        result = watch_service.ensure_all_response_watches()
+        print(
+            "users={users} watched={watched} failed_users={failed}".format(
+                users=result["users"],
+                watched=result["watched"],
+                failed=len(result["failed_users"]),
+            )
+        )

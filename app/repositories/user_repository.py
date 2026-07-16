@@ -16,6 +16,9 @@ class UserRepository:
         snap = self._doc(user_id).get()
         return snap.to_dict() if snap.exists else None
 
+    def list_user_ids(self):
+        return [snap.id for snap in get_db().collection("users").stream()]
+
     def create_or_update_user(self, user_id, data):
         doc = self._doc(user_id)
         snap = doc.get()

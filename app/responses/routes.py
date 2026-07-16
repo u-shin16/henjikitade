@@ -1,13 +1,15 @@
 import logging
+import json
+import queue
 import re
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, Response, jsonify, request, stream_with_context
 
 from app.auth.decorators import current_user_id, login_required
 from app.constants import ADMIN_MEMO_MAX_LENGTH, STATUS_LABELS, STATUSES
 from app.firebase_config import FirebaseConfigError
 from app.repositories import get_repositories
-from app.services import count_service
+from app.services import count_service, realtime
 
 from . import response_service
 
@@ -24,6 +26,10 @@ def _db_error():
 
 def _not_found():
     return jsonify({"success": False, "message": "問い合わせが見つかりませんでした"}), 404
+
+
+def _sse(event, data):
+    return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
 def _get_owned_response(user_id, form_id, response_id):
@@ -60,6 +66,38 @@ def list_responses():
         }), 500
 
     return jsonify({"success": True, "message": "", "data": data})
+
+
+@responses_bp.route("/api/events")
+@login_required
+def response_events():
+    """受信箱へ新着通知を送るServer-Sent Eventsエンドポイント。"""
+    user_id = current_user_id()
+    q = realtime.subscribe(user_id)
+
+    @stream_with_context
+    def stream():
+        yield "retry: 3000\n\n"
+        yield _sse("connected", {"message": "connected"})
+        try:
+            while True:
+                try:
+                    event = q.get(timeout=25)
+                except queue.Empty:
+                    yield ": ping\n\n"
+                    continue
+                yield _sse("inbox", event)
+        finally:
+            realtime.unsubscribe(user_id, q)
+
+    return Response(
+        stream(),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @responses_bp.route("/api/responses/<form_id>/<response_id>")

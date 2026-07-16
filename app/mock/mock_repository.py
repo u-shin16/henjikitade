@@ -20,6 +20,9 @@ class MockUserRepository:
     def get_user(self, user_id):
         return copy.deepcopy(self.store["users"].get(user_id))
 
+    def list_user_ids(self):
+        return list(self.store["users"].keys())
+
     def create_or_update_user(self, user_id, data):
         now = _now()
         user = self.store["users"].get(user_id) or {"created_at": now}
@@ -103,6 +106,22 @@ class MockManagedFormRepository:
         form.update(fields)
         form["updated_at"] = _now()
         return True
+
+    def save_watch_route(self, user_id, form_id, watch_id):
+        if not watch_id:
+            return False
+        self.store.setdefault("watch_routes", {})[watch_id] = {
+            "watch_id": watch_id,
+            "user_id": user_id,
+            "form_id": form_id,
+            "event_type": "RESPONSES",
+            "updated_at": _now(),
+        }
+        return True
+
+    def get_watch_route(self, watch_id):
+        route = self.store.setdefault("watch_routes", {}).get(watch_id)
+        return copy.deepcopy(route) if route else None
 
 
 class MockFormResponseRepository:

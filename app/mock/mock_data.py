@@ -271,6 +271,7 @@ def build_mock_store():
         "tokens": {},
         "forms": {MOCK_USER["google_user_id"]: forms},
         "responses": {MOCK_USER["google_user_id"]: responses},
+        "watch_routes": {},
         "available_forms": available_forms,
         "sync_done": False,
     }
