@@ -314,8 +314,8 @@ CLIを使わない場合は、絞り込みを実行した際にサーバーロ�
 ### 配置と起動確認
 
 ```bash
-sudo mkdir -p /var/www/mitokiya
-cd /var/www/mitokiya
+sudo mkdir -p /var/www/forms
+cd /var/www/forms
 # ソースを配置(git clone等。firebase-service-account.jsonは含めない)
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
@@ -324,10 +324,10 @@ python3 -m venv .venv
 ### Firebase認証情報を安全に配置する
 
 ```bash
-sudo mkdir -p /var/www/mitokiya/secrets
+sudo mkdir -p /var/www/forms/secrets
 # サービスアカウントJSONをscp等で転送してから
-sudo chmod 700 /var/www/mitokiya/secrets
-sudo chmod 600 /var/www/mitokiya/secrets/firebase-service-account.json
+sudo chmod 700 /var/www/forms/secrets
+sudo chmod 600 /var/www/forms/secrets/firebase-service-account.json
 ```
 
 `.env`(本番用)の例:
@@ -337,7 +337,7 @@ SECRET_KEY=本番用のランダムな長い文字列
 FLASK_ENV=production
 APP_BASE_URL=https://あなたのドメイン
 GOOGLE_REDIRECT_URI=https://あなたのドメイン/auth/callback
-FIREBASE_CREDENTIALS_PATH=/var/www/mitokiya/secrets/firebase-service-account.json
+FIREBASE_CREDENTIALS_PATH=/var/www/forms/secrets/firebase-service-account.json
 GOOGLE_FORMS_PUBSUB_TOPIC=projects/your-project-id/topics/google-forms-responses
 GOOGLE_FORMS_PUBSUB_PUSH_TOKEN=十分に長いランダム文字列
 MOCK_MODE=false
@@ -347,28 +347,28 @@ SESSION_COOKIE_SECURE=true
 ### Gunicornでの起動
 
 ```bash
-.venv/bin/gunicorn --workers 1 --worker-class gthread --threads 8 --bind 127.0.0.1:8003 run:app
+.venv/bin/gunicorn --workers 1 --worker-class gthread --threads 8 --timeout 120 --bind 127.0.0.1:8004 run:app
 ```
 
 Server-Sent Eventsの接続とPub/Sub通知を同じプロセス内のイベントブローカーでつなぐため、Redis等を追加しない構成では `--workers 1` を推奨します。接続数は `--threads` で増やします。
 
-※ポート8003が既存アプリと重複していないか `sudo ss -tlnp | grep 8003` で確認してください。
+※ポート8004が既存アプリと重複していないか `sudo ss -tlnp | grep 8004` で確認してください。
 
 ### systemdサービスの設定例
 
-`/etc/systemd/system/mitokiya.service`:
+`/etc/systemd/system/henji.service`:
 
 ```ini
 [Unit]
-Description=Mitokiya (Google Forms inbox)
+Description=Henji Google Forms Management App
 After=network.target
 
 [Service]
-User=www-data
-Group=www-data
-WorkingDirectory=/var/www/mitokiya
-EnvironmentFile=/var/www/mitokiya/.env
-ExecStart=/var/www/mitokiya/.venv/bin/gunicorn --workers 1 --worker-class gthread --threads 8 --bind 127.0.0.1:8003 run:app
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/forms
+EnvironmentFile=/var/www/forms/.env
+ExecStart=/var/www/forms/.venv/bin/gunicorn --workers 1 --worker-class gthread --threads 8 --timeout 120 --bind 127.0.0.1:8004 run:app
 Restart=always
 
 [Install]
@@ -377,18 +377,18 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now mitokiya
+sudo systemctl enable --now henji
 ```
 
 watch期限更新をcronで実行する例:
 
 ```cron
-15 3 * * * cd /var/www/mitokiya && .venv/bin/flask --app run:app ensure-response-watches >> /var/log/mitokiya-watch-renew.log 2>&1
+15 3 * * * cd /var/www/forms && .venv/bin/flask --app app ensure-response-watches >> /var/log/henji-watch-renew.log 2>&1
 ```
 
 ### Nginxの設定例
 
-`/etc/nginx/sites-available/mitokiya`:
+`/etc/nginx/sites-available/henji`:
 
 ```nginx
 server {
@@ -396,7 +396,7 @@ server {
     server_name あなたのドメイン;
 
     location / {
-        proxy_pass http://127.0.0.1:8003;
+        proxy_pass http://127.0.0.1:8004;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -408,7 +408,7 @@ server {
 ```
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/mitokiya /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/henji /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 # HTTPS化(certbot)
 sudo certbot --nginx -d あなたのドメイン

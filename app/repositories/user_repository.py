@@ -55,3 +55,7 @@ class UserRepository:
 
     def delete_oauth_token(self, user_id):
         self._token_doc(user_id).delete()
+
+    def delete_user(self, user_id):
+        """ユーザー文書と配下の全サブコレクションを再帰的に削除する。"""
+        return get_db().recursive_delete(self._doc(user_id))

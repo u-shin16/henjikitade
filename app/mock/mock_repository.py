@@ -45,6 +45,12 @@ class MockUserRepository:
     def delete_oauth_token(self, user_id):
         self.store["tokens"].pop(user_id, None)
 
+    def delete_user(self, user_id):
+        self.store["users"].pop(user_id, None)
+        self.store["tokens"].pop(user_id, None)
+        self.store["forms"].pop(user_id, None)
+        self.store["responses"].pop(user_id, None)
+
 
 class MockManagedFormRepository:
     def __init__(self, store):
@@ -122,6 +128,17 @@ class MockManagedFormRepository:
     def get_watch_route(self, watch_id):
         route = self.store.setdefault("watch_routes", {}).get(watch_id)
         return copy.deepcopy(route) if route else None
+
+    def delete_watch_routes_for_user(self, user_id):
+        routes = self.store.setdefault("watch_routes", {})
+        targets = [
+            watch_id
+            for watch_id, route in routes.items()
+            if route.get("user_id") == user_id
+        ]
+        for watch_id in targets:
+            routes.pop(watch_id, None)
+        return len(targets)
 
 
 class MockFormResponseRepository:

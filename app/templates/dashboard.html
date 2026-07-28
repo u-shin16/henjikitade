@@ -1,89 +1,108 @@
 {% extends "base.html" %}
 {% block title %}受信箱 - {{ APP_NAME }}{% endblock %}
 {% block body %}
+{% set page_title = "受信箱" %}
+{% set active_nav = "inbox" %}
 <div class="app-shell">
-  <header class="app-header">
-    <div class="header-left">
-      <img class="app-logo-img" src="{{ url_for('static', filename='img/app-icon-64.png') }}" alt="" aria-hidden="true">
-      <span class="app-name">{{ APP_NAME }}</span>
-    </div>
-    <div class="header-right">
-      <span id="last-synced" class="last-synced"></span>
-      <button id="sync-btn" class="btn btn-primary">
-        <span class="sync-icon" aria-hidden="true">⟳</span>
-        <span class="sync-label">回答を更新</span>
-      </button>
-      <div class="user-chip">
-        <span class="user-name">{{ session.get('user_name') or 'ユーザー' }}</span>
+  {% include "_app_header.html" %}
+  {% include "_main_nav.html" %}
+
+  <div class="workspace">
+    <section class="page-intro inbox-intro">
+      <div>
+        <span class="eyebrow">STEP 1｜届いた回答を見る</span>
+        <h1>問い合わせを確認</h1>
+        <p>気になる回答を選ぶと、右側に内容と対応メニューが表示されます。</p>
       </div>
-    </div>
-  </header>
-
-  <div class="main-layout">
-    <!-- 左サイドバー -->
-    <nav class="sidebar" id="sidebar">
-      <div class="sidebar-section-title first">状態で絞り込み</div>
-      <ul class="nav-list" id="box-nav">
-        <li><button class="nav-item active" data-box="all">すべての問い合わせ <span class="nav-count" id="count-all">0</span></button></li>
-        <li><button class="nav-item" data-box="unread">未読 <span class="nav-count" id="count-unread">0</span></button></li>
-        <li><button class="nav-item" data-box="unhandled">未対応 <span class="nav-count" id="count-unhandled">0</span></button></li>
-        <li><button class="nav-item" data-box="in_progress">対応中 <span class="nav-count" id="count-in_progress">0</span></button></li>
-        <li><button class="nav-item" data-box="completed">対応済み <span class="nav-count" id="count-completed">0</span></button></li>
-        <li><button class="nav-item" data-box="on_hold">保留 <span class="nav-count" id="count-on_hold">0</span></button></li>
-        <li><button class="nav-item" data-box="important">重要 <span class="nav-count" id="count-important">0</span></button></li>
-      </ul>
-
-      <div class="sidebar-section-title">フォームで絞り込み</div>
-      <ul class="nav-list" id="form-nav"></ul>
-
-      <div class="sidebar-footer">
-        <a href="{{ url_for('forms.forms_page') }}" class="sidebar-link">⚙ フォーム管理</a>
-        <a href="{{ url_for('dashboard.settings') }}" class="sidebar-link">🔧 設定</a>
-        <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener" class="sidebar-link">✉ お問い合わせ</a>
-        <a href="{{ url_for('auth.logout') }}" class="sidebar-link">↪ ログアウト</a>
+      <div class="page-intro-actions">
+        <span id="last-synced" class="last-synced"></span>
+        <button id="sync-btn" class="btn btn-primary">
+          <span class="sync-icon" aria-hidden="true">⟳</span>
+          <span class="sync-label">回答を更新</span>
+        </button>
       </div>
-    </nav>
+    </section>
 
-    <!-- 中央の問い合わせ一覧 -->
-    <section class="inbox-panel">
-      <div class="inbox-toolbar">
-        <div class="filter-group filter-search">
-          <label class="filter-label" for="search-input">検索</label>
-          <input type="search" id="search-input" class="search-input"
-                 placeholder="名前・メール・内容・メモ">
-        </div>
-        <div class="filter-row">
-          <div class="filter-group">
-            <span class="filter-label">期間</span>
-            <div class="date-range">
-              <input type="date" id="date-from" aria-label="開始日">
-              <span class="date-sep">〜</span>
-              <input type="date" id="date-to" aria-label="終了日">
+    <div class="main-layout">
+      <section class="inbox-panel">
+        <div class="inbox-toolbar">
+          <div class="toolbar-section">
+            <span class="filter-label">まずは見たい種類を選択</span>
+            <div class="quick-filters" id="box-nav">
+              <button class="nav-item active" data-box="all">すべて <span class="nav-count" id="count-all">0</span></button>
+              <button class="nav-item" data-box="unread">未読 <span class="nav-count" id="count-unread">0</span></button>
+              <button class="nav-item" data-box="unhandled">未対応 <span class="nav-count" id="count-unhandled">0</span></button>
+              <button class="nav-item" data-box="in_progress">対応中 <span class="nav-count" id="count-in_progress">0</span></button>
+              <button class="nav-item" data-box="completed">対応済み <span class="nav-count" id="count-completed">0</span></button>
+              <button class="nav-item" data-box="on_hold">保留 <span class="nav-count" id="count-on_hold">0</span></button>
+              <button class="nav-item" data-box="important">重要 <span class="nav-count" id="count-important">0</span></button>
             </div>
           </div>
-          <div class="filter-group filter-sort">
-            <label class="filter-label" for="order-select">並び順</label>
-            <select id="order-select">
-              <option value="desc">新しい順</option>
-              <option value="asc">古い順</option>
+
+          <div class="filter-group">
+            <label class="filter-label" for="form-nav">フォーム</label>
+            <select id="form-nav" class="form-filter-select" aria-label="フォームで絞り込み">
+              <option value="">すべてのフォーム</option>
             </select>
           </div>
-          <button id="clear-filters" class="btn btn-ghost btn-sm filter-clear" type="button">リセット</button>
-        </div>
-      </div>
-      <div class="inbox-list" id="inbox-list">
-        <div class="empty-state">読み込み中...</div>
-      </div>
-    </section>
 
-    <!-- 右側の回答詳細 -->
-    <section class="detail-panel" id="detail-panel">
-      <div class="empty-state" id="detail-empty">
-        <div class="empty-icon">📩</div>
-        <p>問い合わせを選択すると詳細が表示されます</p>
-      </div>
-      <div id="detail-content" class="detail-content" hidden></div>
-    </section>
+          <details class="advanced-filters">
+            <summary>検索・期間・並び順</summary>
+            <div class="advanced-filter-content">
+              <div class="filter-group filter-search">
+                <label class="filter-label" for="search-input">キーワード検索</label>
+                <input type="search" id="search-input" class="search-input"
+                       placeholder="名前・メール・内容・メモ">
+              </div>
+              <div class="filter-row">
+                <div class="filter-group">
+                  <span class="filter-label">期間</span>
+                  <div class="date-range">
+                    <input type="date" id="date-from" aria-label="開始日">
+                    <span class="date-sep">〜</span>
+                    <input type="date" id="date-to" aria-label="終了日">
+                  </div>
+                </div>
+                <div class="filter-group filter-sort">
+                  <label class="filter-label" for="order-select">並び順</label>
+                  <select id="order-select">
+                    <option value="desc">新しい順</option>
+                    <option value="asc">古い順</option>
+                  </select>
+                </div>
+                <button id="clear-filters" class="btn btn-ghost btn-sm filter-clear" type="button">絞り込みをリセット</button>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="panel-heading">
+          <div>
+            <span class="panel-step">1</span>
+            <strong>回答を選ぶ</strong>
+          </div>
+          <span class="panel-hint">クリックで詳細を表示</span>
+        </div>
+        <div class="inbox-list" id="inbox-list">
+          <div class="empty-state">読み込み中...</div>
+        </div>
+      </section>
+
+      <section class="detail-panel" id="detail-panel">
+        <div class="panel-heading detail-panel-heading">
+          <div>
+            <span class="panel-step">2</span>
+            <strong>内容を確認・対応</strong>
+          </div>
+        </div>
+        <div class="empty-state" id="detail-empty">
+          <div class="empty-illustration" aria-hidden="true">✓</div>
+          <h2>回答を選択してください</h2>
+          <p>左の一覧から1件選ぶと、回答内容や対応状況を確認できます。</p>
+        </div>
+        <div id="detail-content" class="detail-content" hidden></div>
+      </section>
+    </div>
   </div>
 </div>
 {% endblock %}

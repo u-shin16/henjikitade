@@ -1,0 +1,13 @@
+<header class="app-header">
+  <a href="{{ url_for('dashboard.index') }}" class="brand-link" aria-label="{{ APP_NAME }}の受信箱へ">
+    <img class="app-logo-img" src="{{ url_for('static', filename='img/app-icon-64.png') }}" alt="">
+    <span class="brand-copy">
+      <span class="app-name">{{ APP_NAME }}</span>
+      <span class="brand-page">{{ page_title }}</span>
+    </span>
+  </a>
+  <div class="header-right">
+    <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener" class="header-help">お困りですか？</a>
+    <span class="user-chip">{{ session.get('user_name') or 'ユーザー' }}</span>
+  </div>
+</header>

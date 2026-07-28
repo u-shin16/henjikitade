@@ -1,10 +1,12 @@
 import logging
 import secrets
+import time
 
 from flask import (
     Blueprint,
     current_app,
     flash,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -15,11 +17,12 @@ from flask import (
 from app.repositories import get_repositories
 
 from . import google_oauth
-from .decorators import current_user_id
+from .decorators import current_user_id, login_required
 
 logger = logging.getLogger(__name__)
 
 auth_bp = Blueprint("auth", __name__)
+ACCOUNT_DELETE_REAUTH_SECONDS = 10 * 60
 
 
 @auth_bp.route("/login")
@@ -66,13 +69,24 @@ def google_callback():
         flash("ログインの検証に失敗しました。もう一度お試しください", "error")
         return redirect(url_for("auth.login"))
 
+    oauth_error = request.args.get("error")
+    if oauth_error:
+        logger.info("Google OAuthが拒否されました (error=%s)", oauth_error)
+        if oauth_error == "access_denied":
+            flash(
+                "Googleログインが許可されませんでした。"
+                "管理者から指定されたGoogleアカウントでログインしているか確認してください",
+                "error",
+            )
+        elif oauth_error == "temporarily_unavailable":
+            flash("Googleログインを一時的に利用できません。時間を空けて再度お試しください", "error")
+        else:
+            flash("Googleログインを完了できませんでした。もう一度お試しください", "error")
+        return redirect(url_for("auth.login"))
+
     if not saved_code_verifier:
         logger.warning("OAuth code_verifierがセッションに見つかりませんでした")
         flash("ログインの検証に失敗しました。もう一度お試しください", "error")
-        return redirect(url_for("auth.login"))
-
-    if request.args.get("error"):
-        flash("Googleログインがキャンセルされました", "error")
         return redirect(url_for("auth.login"))
 
     try:
@@ -130,10 +144,87 @@ def logout():
     return redirect(url_for("auth.login"))
 
 
+@auth_bp.route("/api/account/delete", methods=["POST"])
+@login_required
+def delete_account():
+    """アプリ内のアカウントと保存データをすべて削除する。"""
+    user_id = current_user_id()
+    authenticated_at = session.get("authenticated_at")
+    session_age = None
+    if isinstance(authenticated_at, (int, float)):
+        session_age = time.time() - authenticated_at
+    if session_age is None or not 0 <= session_age <= ACCOUNT_DELETE_REAUTH_SECONDS:
+        return jsonify({
+            "success": False,
+            "message": "セキュリティのため、一度ログアウトして再度ログインしてから削除してください",
+            "data": {"need_reauth": True},
+        }), 403
+
+    user_repo, form_repo, _ = get_repositories()
+    credentials = None
+
+    if not current_app.config.get("MOCK_MODE"):
+        try:
+            credentials = google_oauth.get_user_credentials(user_repo, user_id)
+        except google_oauth.ReauthRequired:
+            # すでにGoogle側の許可が無効でも、アプリ内データは削除できる。
+            logger.info("退会時に有効なGoogle認証がありません (user=%s)", user_id)
+        except Exception:
+            logger.warning(
+                "退会時のGoogle認証情報取得に失敗しました (user=%s)",
+                user_id,
+                exc_info=True,
+            )
+
+    if credentials is not None:
+        try:
+            from app.forms import watch_service
+
+            watch_service.stop_response_watches(user_id, credentials)
+        except Exception:
+            # watchは最長7日で失効するため、停止失敗だけで退会を止めない。
+            logger.warning(
+                "退会時のフォームwatch停止処理に失敗しました (user=%s)",
+                user_id,
+                exc_info=True,
+            )
+
+    try:
+        # users配下を消すだけではトップレベルの通知経路が残るため、先に明示削除する。
+        form_repo.delete_watch_routes_for_user(user_id)
+        user_repo.delete_user(user_id)
+    except Exception:
+        logger.exception("アカウントデータの削除に失敗しました (user=%s)", user_id)
+        return jsonify({
+            "success": False,
+            "message": "アカウントの削除に失敗しました。時間を空けて再度お試しください",
+        }), 500
+
+    if credentials is not None:
+        try:
+            google_oauth.revoke_credentials(credentials)
+        except Exception:
+            # アプリ内データの削除は完了しているため、Google側の一時エラーは警告に留める。
+            logger.warning(
+                "退会時のGoogle OAuth許可取り消しに失敗しました (user=%s)",
+                user_id,
+                exc_info=True,
+            )
+
+    session.clear()
+    flash("アカウントを削除しました。同じGoogleアカウントで再登録できます", "success")
+    return jsonify({
+        "success": True,
+        "message": "アカウントを削除しました",
+        "data": {"redirect_url": url_for("auth.login")},
+    })
+
+
 def _establish_session(user_id, name, email, picture_url):
     session.clear()
     session["user_id"] = user_id
     session["google_authorized"] = True
+    session["authenticated_at"] = time.time()
     session["user_name"] = name
     session["user_email"] = email
     session["user_picture"] = picture_url

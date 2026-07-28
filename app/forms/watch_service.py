@@ -74,6 +74,31 @@ def ensure_all_response_watches():
     return result
 
 
+def stop_response_watches(user_id, credentials):
+    """退会前に、ユーザーのGoogle Forms watchを可能な範囲で停止する。"""
+    if current_app.config.get("MOCK_MODE"):
+        return {"stopped": 0, "failed": []}
+
+    _, form_repo, _ = get_repositories()
+    stopped = 0
+    failed = []
+    for form in form_repo.get_forms(user_id):
+        watch_id = form.get("response_watch_id")
+        if not watch_id:
+            continue
+        try:
+            google_forms_api.delete_watch(credentials, form["form_id"], watch_id)
+            stopped += 1
+        except Exception:
+            logger.warning(
+                "退会時のフォームwatch停止に失敗しました (form_id=%s)",
+                form["form_id"],
+                exc_info=True,
+            )
+            failed.append(form.get("title") or form["form_id"])
+    return {"stopped": stopped, "failed": failed}
+
+
 def _ensure_one_watch(credentials, form_repo, user_id, form, topic_name):
     form_id = form["form_id"]
     watch_id = form.get("response_watch_id")

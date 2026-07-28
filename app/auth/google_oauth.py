@@ -25,6 +25,7 @@ SCOPES = [
 ]
 
 USERINFO_ENDPOINT = "https://www.googleapis.com/oauth2/v3/userinfo"
+REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
 
 
 class ReauthRequired(Exception):
@@ -84,6 +85,23 @@ def fetch_userinfo(credentials):
     )
     res.raise_for_status()
     return res.json()
+
+
+def revoke_credentials(credentials):
+    """Googleへ保存済みのOAuth許可を取り消す。"""
+    import requests
+
+    token = credentials.refresh_token or credentials.token
+    if not token:
+        return False
+    res = requests.post(
+        REVOKE_ENDPOINT,
+        data={"token": token},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        timeout=10,
+    )
+    res.raise_for_status()
+    return True
 
 
 # --- トークンの暗号化保存 ---

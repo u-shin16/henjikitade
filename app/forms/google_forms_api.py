@@ -63,3 +63,11 @@ def list_watches(credentials, form_id):
     return _service(credentials).forms().watches().list(
         formId=form_id,
     ).execute().get("watches", [])
+
+
+def delete_watch(credentials, form_id, watch_id):
+    """フォームの回答通知watchを停止する。"""
+    return _service(credentials).forms().watches().delete(
+        formId=form_id,
+        watchId=watch_id,
+    ).execute()

@@ -94,3 +94,16 @@ class ManagedFormRepository:
         data = snap.to_dict() or {}
         data["watch_id"] = snap.id
         return data
+
+    def delete_watch_routes_for_user(self, user_id):
+        """退会ユーザーに紐づくPub/Sub通知経路をすべて削除する。"""
+        from google.cloud.firestore_v1.base_query import FieldFilter
+
+        deleted = 0
+        query = self._watch_routes_col().where(
+            filter=FieldFilter("user_id", "==", user_id)
+        )
+        for snap in query.stream():
+            snap.reference.delete()
+            deleted += 1
+        return deleted
