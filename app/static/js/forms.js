@@ -9,9 +9,7 @@
   function updateSelection() {
     const checked = document.querySelectorAll(".form-check:checked");
     addBtn.disabled = checked.length === 0;
-    selectedCount.textContent = checked.length
-      ? `${checked.length}件を追加します`
-      : "追加するフォームを選択してください";
+    selectedCount.textContent = checked.length ? `${checked.length}件選択中` : "";
   }
 
   document.querySelectorAll(".form-check").forEach((cb) => {
@@ -20,7 +18,7 @@
 
   addBtn.addEventListener("click", async () => {
     const forms = [...document.querySelectorAll(".form-check:checked")].map((cb) => {
-      const row = cb.closest("[data-form-id]");
+      const row = cb.closest("tr");
       return { id: row.dataset.formId, title: row.dataset.formTitle };
     });
     if (!forms.length) return;

@@ -101,15 +101,15 @@
   }
 
   function renderFormNav() {
-    el.formNav.innerHTML = [
-      '<option value="">すべてのフォーム</option>',
-      ...state.forms.map((f) => `
-        <option value="${escapeHtml(f.form_id)}">
-          ${escapeHtml(f.title)}${f.unread_count > 0 ? `（未読${f.unread_count}）` : ""}
-        </option>
-      `),
-    ].join("");
-    el.formNav.value = state.formId || "";
+    el.formNav.innerHTML = state.forms.map((f) => `
+      <li>
+        <button class="nav-item ${state.formId === f.form_id ? "active" : ""}"
+                data-form-id="${escapeHtml(f.form_id)}">
+          <span class="nav-form-title">${escapeHtml(f.title)}</span>
+          <span class="nav-count">${f.unread_count > 0 ? `未読${f.unread_count}` : f.response_count}</span>
+        </button>
+      </li>
+    `).join("");
   }
 
   function renderLastSynced() {
@@ -482,8 +482,11 @@
     loadInbox();
   });
 
-  el.formNav.addEventListener("change", () => {
-    state.formId = el.formNav.value || null;
+  el.formNav.addEventListener("click", (e) => {
+    const btn = e.target.closest(".nav-item");
+    if (!btn) return;
+    const formId = btn.dataset.formId;
+    state.formId = state.formId === formId ? null : formId; // 再クリックで解除
     loadInbox();
   });
 
@@ -532,7 +535,6 @@
     el.dateFrom.value = "";
     el.dateTo.value = "";
     el.orderSelect.value = "desc";
-    el.formNav.value = "";
     el.boxNav.querySelectorAll(".nav-item").forEach((b) =>
       b.classList.toggle("active", b.dataset.box === "all"));
     loadInbox();

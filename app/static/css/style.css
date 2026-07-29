@@ -4,20 +4,20 @@
    ============================================================ */
 
 :root {
-  --accent: #5b4ad9;
-  --accent-light: #efedff;
-  --accent-hover: #4938bd;
-  --bg: #f3f5f9;
+  --accent: #6d28d9;
+  --accent-light: #ede9fe;
+  --accent-hover: #5b21b6;
+  --bg: #f6f5fa;
   --surface: #ffffff;
-  --border: #dfe3ec;
-  --text: #222938;
-  --text-sub: #687083;
-  --unread-bg: #f2f0ff;
+  --border: #e5e3ee;
+  --text: #26212e;
+  --text-sub: #6f6a7c;
+  --unread-bg: #f5f1ff;
   --danger: #dc2626;
   --success: #16a34a;
   --warn: #d97706;
-  --radius: 14px;
-  --shadow: 0 8px 24px rgba(42, 48, 66, 0.07);
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(38, 33, 46, 0.08);
 }
 
 * { box-sizing: border-box; }
@@ -43,9 +43,8 @@ h1, h2, h3 { margin: 0 0 8px; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 40px;
   padding: 8px 16px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid transparent;
   font-size: 14px;
   cursor: pointer;
@@ -64,7 +63,7 @@ h1, h2, h3 { margin: 0 0 8px; }
   border-color: var(--border);
 }
 .btn-ghost:hover { background: var(--accent-light); }
-.btn-sm { min-height: 34px; padding: 4px 10px; font-size: 12px; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
 
 .badge {
   display: inline-block;
@@ -132,196 +131,56 @@ h1, h2, h3 { margin: 0 0 8px; }
 
 /* --- ヘッダー --- */
 
-.app-shell { display: flex; flex-direction: column; height: 100vh; background: var(--bg); }
+.app-shell { display: flex; flex-direction: column; height: 100vh; }
 body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
 
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 62px;
-  padding: 10px 24px;
-  background: var(--surface);
-  flex-shrink: 0;
-}
-.brand-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 11px;
-  color: var(--text);
-  text-decoration: none;
-}
-.app-logo-img {
-  display: block;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(54, 43, 133, 0.18);
-}
-.brand-copy { display: flex; align-items: baseline; gap: 10px; }
-.app-name { font-size: 17px; font-weight: 800; color: var(--accent); }
-.brand-page {
-  padding-left: 10px;
-  border-left: 1px solid var(--border);
-  color: var(--text-sub);
-  font-size: 12px;
-  font-weight: 700;
-}
-.header-right { display: flex; align-items: center; gap: 14px; }
-.last-synced { font-size: 12px; color: var(--text-sub); }
-.user-chip {
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: var(--bg);
-  font-size: 12px;
-  color: var(--text-sub);
-}
-.header-help {
-  color: var(--text-sub);
-  font-size: 12px;
-  text-decoration: none;
-}
-.header-help:hover { color: var(--accent); }
-
-/* --- 主機能ナビゲーション --- */
-
-.primary-nav-wrap {
-  flex-shrink: 0;
-  padding: 0 24px 12px;
+  padding: 10px 20px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-}
-.primary-nav {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  width: min(100%, 1120px);
-  margin: 0 auto;
-}
-.primary-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  min-height: 64px;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: 13px;
-  background: var(--surface);
-  color: var(--text);
-  text-decoration: none;
-  transition: border-color 0.15s, background 0.15s, transform 0.15s;
-}
-.primary-nav-item:hover {
-  border-color: #bdb6f4;
-  background: #faf9ff;
-  transform: translateY(-1px);
-}
-.primary-nav-item.active {
-  border-color: var(--accent);
-  background: var(--accent-light);
-  box-shadow: inset 0 0 0 1px var(--accent);
-}
-.primary-nav-icon {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  border-radius: 11px;
-  background: var(--bg);
-  color: var(--text-sub);
-}
-.primary-nav-item.active .primary-nav-icon {
-  background: var(--surface);
-  color: var(--accent);
-}
-.primary-nav-icon svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
-}
-.primary-nav-copy { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
-.primary-nav-copy strong { font-size: 14px; }
-.primary-nav-copy small {
-  margin-top: 2px;
-  color: var(--text-sub);
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-/* --- ページ共通 --- */
-
-.workspace {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-}
-.content-page {
-  width: min(100%, 1180px);
-  margin: 0 auto;
-}
-.page-intro {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  width: min(100%, 1180px);
-  margin: 0 auto;
-  padding: 22px 24px 18px;
-}
-.page-intro h1 {
-  margin: 2px 0 2px;
-  font-size: clamp(21px, 2vw, 28px);
-  letter-spacing: -0.02em;
-}
-.page-intro p { margin: 0; color: var(--text-sub); font-size: 13px; }
-.eyebrow {
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-}
-.page-intro-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   flex-shrink: 0;
 }
-.intro-stat {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  padding: 10px 16px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  color: var(--text-sub);
+.header-left { display: flex; align-items: center; gap: 10px; }
+.app-logo-img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
 }
-.intro-stat strong { color: var(--accent); font-size: 24px; }
+.app-name { font-size: 17px; font-weight: 700; color: var(--accent); }
+.back-link { text-decoration: none; font-size: 13px; }
+.header-right { display: flex; align-items: center; gap: 14px; }
+.last-synced { font-size: 12px; color: var(--text-sub); }
+.user-chip { font-size: 13px; color: var(--text-sub); }
 
 .sync-icon { display: inline-block; }
 .syncing .sync-icon { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* --- 受信箱の2ステップレイアウト --- */
+/* --- 3カラムレイアウト --- */
 
 .main-layout {
   display: grid;
-  grid-template-columns: minmax(360px, 440px) minmax(460px, 1fr);
-  gap: 16px;
-  width: min(100%, 1440px);
-  margin: 0 auto;
-  padding: 0 24px 24px;
+  grid-template-columns: 220px minmax(320px, 420px) 1fr;
+  gap: 12px;
+  padding: 12px 20px 16px;
   flex: 1;
   min-height: 0;
 }
 
+.sidebar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.nav-list { list-style: none; margin: 0; padding: 0; }
 .nav-item {
   display: flex;
   justify-content: space-between;
@@ -348,6 +207,35 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
   flex-shrink: 0;
 }
 .nav-item.active .nav-count { background: #fff; color: var(--accent-hover); }
+.nav-form-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-section-title {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin: 14px 10px 4px;
+}
+.sidebar-section-title.first { margin-top: 0; }
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sidebar-link {
+  padding: 6px 10px;
+  text-decoration: none;
+  color: var(--text-sub);
+  font-size: 13px;
+  border-radius: 8px;
+}
+.sidebar-link:hover { background: var(--bg); color: var(--text); }
+
 /* --- 中央: 問い合わせ一覧 --- */
 
 .inbox-panel {
@@ -359,57 +247,11 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 15px;
-  margin-bottom: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-shadow: var(--shadow);
-}
-.toolbar-section { display: flex; flex-direction: column; gap: 7px; }
-.quick-filters { display: flex; flex-wrap: wrap; gap: 6px; }
-.quick-filters .nav-item {
-  width: auto;
-  min-height: 34px;
-  justify-content: flex-start;
-  padding: 5px 9px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  font-size: 12px;
-}
-.quick-filters .nav-item:hover { border-color: #bdb6f4; background: #faf9ff; }
-.quick-filters .nav-item.active {
-  border-color: var(--accent);
-  background: var(--accent-light);
-  color: var(--accent-hover);
-}
-.quick-filters .nav-count { padding: 0 6px; background: var(--bg); }
-.form-filter-select {
-  width: 100%;
-  min-height: 38px;
-  padding: 7px 10px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 13px;
-}
-.advanced-filters {
-  border-top: 1px solid var(--border);
-  padding-top: 9px;
-}
-.advanced-filters summary {
-  width: fit-content;
-  color: var(--accent);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-}
-.advanced-filter-content {
+  padding: 12px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-top: 11px;
 }
 .filter-row {
   display: flex;
@@ -466,20 +308,19 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  padding: 2px 3px 4px;
+  gap: 8px;
   min-height: 0;
 }
 
 .inbox-item {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 14px;
+  border-radius: var(--radius);
+  padding: 10px 14px;
   cursor: pointer;
   box-shadow: var(--shadow);
 }
-.inbox-item:hover { border-color: var(--accent); transform: translateY(-1px); }
+.inbox-item:hover { border-color: var(--accent); }
 .inbox-item.selected { border-color: var(--accent); outline: 2px solid var(--accent-light); }
 
 /* 未読は太字 + 丸マーク + 薄い背景色で目立たせる */
@@ -533,58 +374,11 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
+  overflow-y: auto;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow);
 }
-.detail-content { flex: 1; overflow-y: auto; padding: 18px 20px; }
+.detail-content { padding: 18px 20px; }
 .detail-back { display: none; margin-bottom: 8px; }
-.panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 42px;
-  color: var(--text-sub);
-  font-size: 12px;
-}
-.panel-heading > div { display: flex; align-items: center; gap: 8px; }
-.panel-step {
-  display: inline-grid;
-  place-items: center;
-  width: 23px;
-  height: 23px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 800;
-}
-.panel-hint { font-size: 11px; }
-.detail-panel-heading {
-  flex-shrink: 0;
-  padding: 9px 16px;
-  border-bottom: 1px solid var(--border);
-  background: #fafbfe;
-}
-.detail-panel > .empty-state {
-  flex: 1;
-  min-height: 260px;
-}
-.detail-panel > .empty-state h2 { margin-top: 10px; font-size: 17px; color: var(--text); }
-.detail-panel > .empty-state p { max-width: 340px; margin: 0; }
-.empty-illustration {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
-  background: var(--accent-light);
-  color: var(--accent);
-  font-size: 24px;
-  font-weight: 800;
-}
 
 .detail-title-row {
   display: flex;
@@ -878,158 +672,57 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
 
 /* --- フォーム管理画面 --- */
 
-.page-body { padding: 0 24px 32px; overflow-y: auto; }
+.page-body { padding: 16px 20px; overflow-y: auto; }
 .page-narrow { max-width: 640px; margin: 0 auto; width: 100%; }
 
 .onboarding-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
   background: var(--accent-light);
-  border: 1px solid #d5cffd;
   border-radius: var(--radius);
-  padding: 16px 18px;
-  margin-bottom: 16px;
+  padding: 16px 20px;
+  margin-bottom: 14px;
 }
 .onboarding-card h2 { font-size: 16px; color: var(--accent-hover); }
 .onboarding-card p { margin: 0; font-size: 13px; }
-.onboarding-number {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 800;
-}
 
 .forms-actions {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 14px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
+  margin-bottom: 10px;
 }
 .selected-count { font-size: 12px; color: var(--text-sub); }
 
-.form-card-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-.form-card {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  min-width: 0;
-  padding: 18px;
+.forms-table-wrap {
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  overflow-x: auto;
 }
-.form-card.is-managed { border-top: 3px solid var(--success); }
-.form-card-header { display: flex; align-items: flex-start; gap: 11px; }
-.form-card-icon {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  border-radius: 10px;
-  background: var(--accent-light);
-  color: var(--accent);
-  font-weight: 900;
+.forms-table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.forms-table th, .forms-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
 }
-.form-card-title-wrap { min-width: 0; }
-.form-title {
-  margin: 0 0 4px;
-  overflow: hidden;
-  font-size: 15px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.form-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-.form-metrics > div {
-  display: flex;
-  flex-direction: column;
-  padding: 9px 10px;
-  border-radius: 10px;
-  background: var(--bg);
-}
-.form-metrics strong { font-size: 18px; }
-.form-metrics span { color: var(--text-sub); font-size: 10px; }
-.form-card-meta {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0;
-}
-.form-card-meta div { min-width: 0; }
-.form-card-meta dt { color: var(--text-sub); font-size: 10px; }
-.form-card-meta dd {
-  margin: 1px 0 0;
-  overflow: hidden;
-  font-size: 11px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.form-select-control {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-height: 42px;
-  padding: 8px 11px;
-  border: 1px solid #cec9f7;
-  border-radius: 10px;
-  background: #faf9ff;
-  color: var(--accent-hover);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-}
-.form-select-control input { width: 17px; height: 17px; accent-color: var(--accent); }
+.forms-table th { font-size: 11px; color: var(--text-sub); font-weight: 600; white-space: nowrap; }
+.forms-table tr:last-child td { border-bottom: none; }
+.col-check { width: 32px; }
+.col-num { text-align: right; width: 52px; }
+.form-title { font-weight: 600; }
 .form-id-note { font-size: 10px; color: var(--text-sub); word-break: break-all; }
-.form-row-actions { display: flex; gap: 7px; flex-wrap: wrap; margin-top: auto; }
+.form-row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* --- 設定画面 --- */
 
 .settings-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 18px 20px;
   margin-bottom: 14px;
-  box-shadow: var(--shadow);
 }
-.settings-card h2 { font-size: 17px; }
-.settings-card p { margin: 0 0 12px; color: var(--text-sub); font-size: 13px; }
-.settings-card-icon {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
-  border-radius: 10px;
-  background: var(--accent-light);
-  color: var(--accent);
-  font-weight: 800;
-}
-.settings-card-body { flex: 1; min-width: 0; }
-.settings-kicker { color: var(--text-sub); font-size: 10px; font-weight: 700; }
+.settings-card h2 { font-size: 15px; }
 .account-row { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
 .account-avatar { width: 44px; height: 44px; border-radius: 50%; }
 .account-name { font-weight: 700; }
@@ -1039,51 +732,6 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
 .danger-zone { border-color: #fecaca; }
 .danger-zone h2 { color: var(--danger); }
 .danger-zone p { color: var(--text-sub); font-size: 13px; }
-
-/* --- アカウント画面 --- */
-
-.account-card {
-  padding: 22px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-.account-card-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
-}
-.account-label { color: var(--text-sub); font-size: 11px; font-weight: 700; }
-.account-profile { display: flex; align-items: center; gap: 15px; padding: 22px 0; }
-.account-avatar-large { width: 64px; height: 64px; }
-.account-avatar-placeholder {
-  display: grid;
-  place-items: center;
-  background: var(--accent-light);
-  color: var(--accent);
-  font-size: 22px;
-  font-weight: 800;
-}
-.account-name-large { font-size: 18px; }
-.account-actions { display: flex; gap: 8px; }
-.account-danger {
-  margin-top: 18px;
-  border: 1px solid #fecaca;
-  border-radius: 12px;
-  background: #fffafa;
-}
-.account-danger summary {
-  padding: 13px 16px;
-  color: #991b1b;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-}
-.danger-content { padding: 0 16px 16px; }
-.danger-content h2 { font-size: 15px; }
 
 /* --- エラーページ --- */
 
@@ -1102,87 +750,24 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
 /* --- スマートフォン対応 --- */
 
 @media (max-width: 960px) {
-  .primary-nav-item { padding: 9px 10px; }
-  .primary-nav-icon { width: 34px; height: 34px; flex-basis: 34px; }
   .main-layout {
     grid-template-columns: 1fr;
-    padding: 0 16px 18px;
+    padding: 10px;
   }
+  .sidebar { order: 0; max-height: 200px; }
+  .inbox-panel { order: 1; }
   .detail-panel { display: none; }
 
   /* 詳細表示時は一覧の代わりに詳細を全面表示する */
+  .main-layout.show-detail .sidebar,
   .main-layout.show-detail .inbox-panel { display: none; }
-  .main-layout.show-detail .detail-panel { display: flex; }
+  .main-layout.show-detail .detail-panel { display: block; }
   .detail-back { display: inline-flex; }
 
   .app-header { flex-wrap: wrap; gap: 8px; }
-  .form-card-grid { grid-template-columns: 1fr; }
   .detail-meta { grid-template-columns: 1fr; }
   .function-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .detail-status-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .form-action-panel { grid-template-columns: 1fr; }
   .important-row { max-width: none; }
-}
-
-@media (max-width: 680px) {
-  .app-header { min-height: 56px; padding: 9px 14px; }
-  .app-logo-img { width: 32px; height: 32px; }
-  .brand-copy { gap: 7px; }
-  .brand-page { display: none; }
-  .header-help { display: none; }
-  .user-chip {
-    max-width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .primary-nav-wrap { padding: 0 12px 10px; }
-  .primary-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
-  .primary-nav-item { min-height: 56px; padding: 8px 10px; border-radius: 11px; }
-  .primary-nav-icon { width: 32px; height: 32px; flex-basis: 32px; border-radius: 9px; }
-  .primary-nav-icon svg { width: 19px; height: 19px; }
-  .primary-nav-copy strong { font-size: 13px; }
-  .primary-nav-copy small { font-size: 9px; }
-
-  .page-intro {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
-    padding: 17px 14px 14px;
-  }
-  .page-intro-actions { width: 100%; justify-content: space-between; }
-  .page-intro-actions .last-synced { max-width: 52%; }
-  .page-intro h1 { font-size: 22px; }
-  .page-intro p { font-size: 12px; }
-  .intro-stat { align-self: flex-end; }
-
-  .main-layout { padding: 0 12px 14px; }
-  .inbox-toolbar { padding: 12px; }
-  .quick-filters {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .quick-filters .nav-item { width: 100%; justify-content: space-between; }
-  .filter-row { align-items: stretch; flex-direction: column; }
-  .filter-sort { flex-basis: auto; }
-  .filter-clear { width: 100%; margin-left: 0; justify-content: center; }
-  .date-range { align-items: stretch; flex-direction: column; }
-  .date-sep { display: none; }
-  .date-range input[type="date"] { min-width: 0; }
-  .panel-hint { display: none; }
-  .detail-content { padding: 15px; }
-
-  .page-body { padding: 0 14px 24px; }
-  .onboarding-card { padding: 14px; }
-  .forms-actions { align-items: stretch; flex-direction: column; }
-  .forms-actions .btn { justify-content: center; }
-  .form-card { padding: 15px; }
-  .form-card-meta { grid-template-columns: 1fr; }
-  .form-row-actions .btn { flex: 1; justify-content: center; }
-
-  .settings-card { padding: 16px; }
-  .account-card { padding: 17px; }
-  .account-profile { align-items: flex-start; }
-  .account-email { overflow-wrap: anywhere; }
 }

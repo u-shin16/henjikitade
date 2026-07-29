@@ -1,32 +1,23 @@
 {% extends "base.html" %}
 {% block title %}フォーム管理 - {{ APP_NAME }}{% endblock %}
 {% block body %}
-{% set page_title = "フォーム" %}
-{% set active_nav = "forms" %}
 <div class="app-shell">
-  {% include "_app_header.html" %}
-  {% include "_main_nav.html" %}
+  <header class="app-header">
+    <div class="header-left">
+      <a href="{{ url_for('dashboard.index') }}" class="back-link">← 受信箱へ</a>
+      <span class="app-name">フォーム管理</span>
+    </div>
+    <div class="header-right">
+      <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener" class="sidebar-link">お問い合わせ</a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-link">ログアウト</a>
+    </div>
+  </header>
 
-  <div class="page-body content-page">
-    <section class="page-intro">
-      <div>
-        <span class="eyebrow">STEP 2｜集めるフォームを選ぶ</span>
-        <h1>フォームを管理</h1>
-        <p>回答を受信箱に集めたいGoogleフォームを選びます。現在の状態もカードで確認できます。</p>
-      </div>
-      <div class="intro-stat">
-        <strong>{{ rows|length }}</strong>
-        <span>フォーム</span>
-      </div>
-    </section>
-
+  <div class="page-body">
     {% if not has_active %}
     <div class="onboarding-card">
-      <span class="onboarding-number">1</span>
-      <div>
-        <h2>最初に管理するフォームを選びましょう</h2>
-        <p>カードの「このフォームを選択」にチェックし、上の追加ボタンを押してください。</p>
-      </div>
+      <h2>管理するGoogleフォームを選択してください</h2>
+      <p>チェックボックスでフォームを選び、「管理対象に追加」を押すと、届いた回答を受信箱でまとめて確認できるようになります。</p>
     </div>
     {% endif %}
 
@@ -36,60 +27,68 @@
 
     <div class="forms-actions">
       <button id="add-selected-btn" class="btn btn-primary" disabled>管理対象に追加</button>
-      <span id="selected-count" class="selected-count">追加するフォームを選択してください</span>
+      <span id="selected-count" class="selected-count"></span>
     </div>
 
     {% if rows %}
-    <div class="form-card-grid">
-      {% for row in rows %}
-      <article class="form-card{% if row.is_managed %} is-managed{% endif %}"
-               data-form-id="{{ row.form_id }}" data-form-title="{{ row.title }}">
-        <div class="form-card-header">
-          <div class="form-card-icon" aria-hidden="true">F</div>
-          <div class="form-card-title-wrap">
-            <h2 class="form-title">{{ row.title }}</h2>
-            {% if row.missing_on_drive %}
-            <span class="badge badge-warn">Driveで見つかりません</span>
-            {% elif row.is_managed %}
-            <span class="badge badge-active">管理中</span>
-            {% elif row.was_managed %}
-            <span class="badge badge-muted">停止中</span>
-            {% else %}
-            <span class="badge badge-muted">未管理</span>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="form-metrics" aria-label="回答状況">
-          <div><strong>{{ row.response_count }}</strong><span>回答</span></div>
-          <div><strong>{{ row.unread_count }}</strong><span>未読</span></div>
-          <div><strong>{{ row.unhandled_count }}</strong><span>未対応</span></div>
-        </div>
-
-        <dl class="form-card-meta">
-          <div><dt>最終更新</dt><dd>{{ row.modified_time | jpdatetime if row.modified_time else "-" }}</dd></div>
-          <div><dt>最終同期</dt><dd>{{ row.last_synced_at | jpdatetime if row.last_synced_at else "未同期" }}</dd></div>
-        </dl>
-
-        {% if not row.is_managed and not row.was_managed %}
-        <label class="form-select-control">
-          <input type="checkbox" class="form-check">
-          <span>このフォームを選択</span>
-        </label>
-        {% endif %}
-
-        <div class="form-row-actions">
-          {% if row.is_managed %}
-          <button class="btn btn-ghost btn-sm deactivate-btn">管理を停止</button>
-          {% elif row.was_managed %}
-          <button class="btn btn-primary btn-sm reactivate-btn">管理を再開</button>
-          {% endif %}
-          {% if row.web_view_link %}
-          <a href="{{ row.web_view_link }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Googleフォームを開く</a>
-          {% endif %}
-        </div>
-      </article>
-      {% endfor %}
+    <div class="forms-table-wrap">
+      <table class="forms-table">
+        <thead>
+          <tr>
+            <th class="col-check"></th>
+            <th>フォーム名</th>
+            <th>最終更新</th>
+            <th>最終同期</th>
+            <th class="col-num">回答</th>
+            <th class="col-num">未読</th>
+            <th class="col-num">未対応</th>
+            <th>状態</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr data-form-id="{{ row.form_id }}" data-form-title="{{ row.title }}">
+            <td class="col-check">
+              {% if not row.is_managed %}
+              <input type="checkbox" class="form-check" aria-label="選択">
+              {% endif %}
+            </td>
+            <td>
+              <span class="form-title">{{ row.title }}</span>
+              {% if row.missing_on_drive %}
+              <span class="badge badge-warn">Driveで見つかりません</span>
+              {% endif %}
+              <div class="form-id-note">ID: {{ row.form_id }}</div>
+            </td>
+            <td>{{ row.modified_time | jpdatetime if row.modified_time else "-" }}</td>
+            <td>{{ row.last_synced_at | jpdatetime if row.last_synced_at else "未同期" }}</td>
+            <td class="col-num">{{ row.response_count }}</td>
+            <td class="col-num">{{ row.unread_count }}</td>
+            <td class="col-num">{{ row.unhandled_count }}</td>
+            <td>
+              {% if row.is_managed %}
+              <span class="badge badge-active">管理中</span>
+              {% elif row.was_managed %}
+              <span class="badge badge-muted">停止中</span>
+              {% else %}
+              <span class="badge badge-muted">未管理</span>
+              {% endif %}
+            </td>
+            <td class="form-row-actions">
+              {% if row.is_managed %}
+              <button class="btn btn-ghost btn-sm deactivate-btn">管理対象から外す</button>
+              {% elif row.was_managed %}
+              <button class="btn btn-ghost btn-sm reactivate-btn">再開する</button>
+              {% endif %}
+              {% if row.web_view_link %}
+              <a href="{{ row.web_view_link }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">フォームを開く</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
     {% else %}
     <div class="empty-state">

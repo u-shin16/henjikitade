@@ -47,18 +47,3 @@ def settings():
         flash("データベースへの接続に失敗しました", "error")
 
     return render_template("settings.html", user=user, managed_forms=managed_forms)
-
-
-@dashboard_bp.route("/account")
-@login_required
-def account():
-    user_id = current_user_id()
-    user_repo, _, _ = get_repositories()
-    user = None
-    try:
-        user = user_repo.get_user(user_id)
-    except FirebaseConfigError:
-        logger.exception("アカウント画面のデータ取得に失敗しました")
-        flash("アカウント情報を取得できませんでした", "error")
-
-    return render_template("account.html", user=user)
