@@ -15,8 +15,8 @@
     <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener" class="login-contact-link">お問い合わせ</a>
 
     <nav class="login-legal-links" aria-label="規約・法的情報">
-      <a href="https://webtool-labs.com/terms.html" target="_blank" rel="noopener noreferrer" class="login-contact-link">利用規約</a>
-      <a href="https://webtool-labs.com/privacy.html" target="_blank" rel="noopener noreferrer" class="login-contact-link">プライバシーポリシー</a>
+      <a href="{{ url_for('auth.terms') }}" class="login-contact-link">利用規約</a>
+      <a href="{{ url_for('auth.privacy') }}" class="login-contact-link">プライバシーポリシー</a>
       <a href="https://webtool-labs.com/operator.html" target="_blank" rel="noopener noreferrer" class="login-contact-link">運営者情報</a>
     </nav>
 

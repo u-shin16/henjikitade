@@ -67,8 +67,8 @@
       <h2>規約・法的情報</h2>
       <p>本アプリはRakuYadeブランドの共通ページを利用しています。</p>
       <div class="settings-legal-links">
-        <a href="https://webtool-labs.com/terms.html" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">利用規約</a>
-        <a href="https://webtool-labs.com/privacy.html" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">プライバシーポリシー</a>
+        <a href="{{ url_for('auth.terms') }}" class="btn btn-ghost">利用規約</a>
+        <a href="{{ url_for('auth.privacy') }}" class="btn btn-ghost">プライバシーポリシー</a>
         <a href="https://webtool-labs.com/operator.html" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">運営者情報</a>
       </div>
     </div>

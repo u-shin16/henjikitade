@@ -783,3 +783,20 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
   .form-action-panel { grid-template-columns: 1fr; }
   .important-row { max-width: none; }
 }
+
+/* ---------- 規約・プライバシーポリシーページ ---------- */
+.legal-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+  color: var(--text);
+  line-height: 1.8;
+}
+.legal-page h1 { font-size: 24px; margin-bottom: 4px; }
+.legal-updated { color: var(--text-sub); font-size: 13px; margin-bottom: 24px; }
+.legal-page section { margin-bottom: 28px; }
+.legal-page h2 { font-size: 17px; margin-bottom: 8px; }
+.legal-page p, .legal-page li { color: var(--text); font-size: 14px; }
+.legal-page ul { padding-left: 20px; }
+.legal-page a { color: var(--accent); }
+.legal-back { margin-top: 8px; }

@@ -32,6 +32,16 @@ def login():
     return render_template("login.html")
 
 
+@auth_bp.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+
+@auth_bp.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+
 @auth_bp.route("/auth/google")
 def google_login():
     if current_app.config.get("MOCK_MODE"):
