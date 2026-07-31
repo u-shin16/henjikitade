@@ -660,6 +660,13 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
   color: var(--text-sub);
 }
 .login-contact-link:hover { color: var(--accent); }
+.login-legal-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.login-legal-links .login-contact-link { margin-top: 0; }
 .login-info {
   text-align: left;
   margin-top: 26px;
@@ -715,6 +722,11 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
 
 /* --- 設定画面 --- */
 
+.settings-legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .settings-card {
   background: var(--surface);
   border: 1px solid var(--border);
