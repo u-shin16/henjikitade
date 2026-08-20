@@ -65,7 +65,13 @@ def ensure_all_response_watches():
             if user_result.get("failed"):
                 result["failed_users"].append(user_id)
         except google_oauth.ReauthRequired:
-            logger.info("watch整備のためのGoogle認証が切れています (user=%s)", user_id)
+            # 再ログインするまでwatchの更新が止まり、7日後に回答通知が届かなくなる。
+            # 放置すると気づけないためwarningで残す。
+            logger.warning(
+                "Google認証が切れているためwatchを更新できません。"
+                "再ログインまで回答通知が止まります (user=%s)",
+                user_id,
+            )
             result["failed_users"].append(user_id)
         except Exception:
             logger.exception("ユーザーのwatch整備に失敗しました (user=%s)", user_id)
@@ -114,7 +120,8 @@ def _ensure_one_watch(credentials, form_repo, user_id, form, topic_name):
             _store_watch(form_repo, user_id, form_id, watch)
             return watch
         except HttpError:
-            logger.info("既存watchの更新に失敗したため再作成を試します (form_id=%s)", form_id)
+            # 失効済みwatch_idへのrenewは403を返す。フォールバックで作り直せるため想定内。
+            logger.debug("既存watchの更新に失敗したため再作成を試します (form_id=%s)", form_id)
 
     existing = _find_existing_response_watch(credentials, form_id, topic_name)
     if existing:

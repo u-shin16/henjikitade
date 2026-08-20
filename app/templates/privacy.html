@@ -14,7 +14,7 @@
     <h2>2. 取得する情報</h2>
     <ul>
       <li>Googleアカウントの氏名・メールアドレス・プロフィール画像</li>
-      <li>Google Forms APIを通じて取得する、管理対象に選択したフォームの一覧・質問内容・回答データ</li>
+      <li>Google Forms APIを通じて取得する、利用者が登録したフォームの質問内容・回答データ</li>
       <li>アクセス解析情報（Google Analytics、測定ID：G-VT013GDMVN）</li>
       <li>サーバーログ（IPアドレス、アクセス日時、エラー内容等。不具合調査・不正アクセス対策のため）</li>
     </ul>
@@ -26,7 +26,6 @@
     <p>Googleアカウント連携時に要求する権限は、必要最小限の以下のみです。</p>
     <ul>
       <li><code>openid</code> / <code>userinfo.email</code> / <code>userinfo.profile</code>：本人確認・アカウント表示のため</li>
-      <li><code>drive.metadata.readonly</code>：Googleフォームの一覧を取得するため（閲覧のみ）</li>
       <li><code>forms.body.readonly</code>：フォームの質問内容を取得するため（閲覧のみ）</li>
       <li><code>forms.responses.readonly</code>：フォームの回答を取得するため（閲覧のみ）</li>
     </ul>
