@@ -78,6 +78,19 @@ class AddFormByUrlTestCase(unittest.TestCase):
             form_ids = {f["form_id"] for f in form_repo.get_forms(MOCK_USER["google_user_id"])}
         self.assertIn("newform123456789", form_ids)
 
+    def test_registration_syncs_immediately(self):
+        """登録直後に取り込まないと「未同期・回答0件」の画面になり失敗に見える。"""
+        response = self.client.post(
+            "/api/forms/add-by-url",
+            json={"url": "https://docs.google.com/forms/d/syncnow123456789/edit"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        with self.app.app_context():
+            _, form_repo, _ = repositories.get_repositories()
+            form = form_repo.get_form(MOCK_USER["google_user_id"], "syncnow123456789")
+        self.assertIsNotNone(form.get("last_synced_at"), "登録直後に同期されていない")
+
     def test_rejects_responder_url_before_touching_the_database(self):
         response = self.client.post(
             "/api/forms/add-by-url",

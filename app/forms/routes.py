@@ -126,10 +126,25 @@ def add_form_by_url():
         # watchが張れなくても手動同期で回答は取れるため、登録自体は成功として扱う
         logger.exception("フォームwatchの登録に失敗しました")
 
+    # 登録した直後に一度取り込む。ここを省くと「登録したのに未同期・回答0件」の
+    # 画面になり、失敗したように見える
+    new_count = None
+    try:
+        new_count = sync_service.sync_form(user_id, form_id).get("new_count", 0)
+    except Exception:
+        logger.exception("登録直後の同期に失敗しました (form_id=%s)", form_id)
+
+    if new_count:
+        message = f"「{title}」を管理対象に追加し、回答{new_count}件を取り込みました"
+    elif new_count == 0:
+        message = f"「{title}」を管理対象に追加しました（まだ回答はありません）"
+    else:
+        message = f"「{title}」を管理対象に追加しました"
+
     return jsonify({
         "success": True,
-        "message": f"「{title}」を管理対象に追加しました",
-        "data": {"form_id": form_id, "title": title},
+        "message": message,
+        "data": {"form_id": form_id, "title": title, "new_count": new_count},
     })
 
 
