@@ -1,37 +1,50 @@
 /**
  * フォーム管理画面のロジック。
- * チェックボックスで選択したフォームの一括追加と、管理対象の有効/無効切り替え。
+ * フォームのURLを貼って登録する処理と、管理対象の有効/無効切り替え。
  */
 (() => {
-  const addBtn = document.getElementById("add-selected-btn");
-  const selectedCount = document.getElementById("selected-count");
+  const input = document.getElementById("form-url-input");
+  const addBtn = document.getElementById("add-form-btn");
+  const errorEl = document.getElementById("form-add-error");
 
-  function updateSelection() {
-    const checked = document.querySelectorAll(".form-check:checked");
-    addBtn.disabled = checked.length === 0;
-    selectedCount.textContent = checked.length ? `${checked.length}件選択中` : "";
+  function showError(message) {
+    errorEl.textContent = message || "";
+    errorEl.hidden = !message;
   }
 
-  document.querySelectorAll(".form-check").forEach((cb) => {
-    cb.addEventListener("change", updateSelection);
-  });
+  async function addForm() {
+    const url = input.value.trim();
+    if (!url) {
+      showError("フォームのURLを入力してください");
+      input.focus();
+      return;
+    }
 
-  addBtn.addEventListener("click", async () => {
-    const forms = [...document.querySelectorAll(".form-check:checked")].map((cb) => {
-      const row = cb.closest("tr");
-      return { id: row.dataset.formId, title: row.dataset.formTitle };
-    });
-    if (!forms.length) return;
-
+    showError("");
     addBtn.disabled = true;
-    const result = await Api.post("/api/forms/manage", { forms });
+    const result = await Api.post("/api/forms/add-by-url", { url });
     showToast(result.message, result.success ? "success" : "error");
+
     if (result.success) {
+      input.value = "";
       setTimeout(() => window.location.reload(), 800);
-    } else {
-      addBtn.disabled = false;
+      return;
+    }
+
+    // 貼り直してもらう必要があるため、理由は入力欄のそばにも残す
+    showError(result.message);
+    addBtn.disabled = false;
+    input.focus();
+  }
+
+  addBtn.addEventListener("click", addForm);
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addForm();
     }
   });
+  input.addEventListener("input", () => showError(""));
 
   async function setActive(row, isActive, btn) {
     btn.disabled = true;
@@ -54,6 +67,4 @@
   document.querySelectorAll(".reactivate-btn").forEach((btn) => {
     btn.addEventListener("click", () => setActive(btn.closest("tr"), true, btn));
   });
-
-  updateSelection();
 })();

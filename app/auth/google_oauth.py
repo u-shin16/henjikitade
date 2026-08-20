@@ -14,12 +14,13 @@ from flask import current_app
 
 logger = logging.getLogger(__name__)
 
-# 必要最小限のスコープのみ要求する
+# 必要最小限のスコープのみ要求する。
+# drive.metadata.readonlyは制限付きスコープで、検証にCASA（有償の第三者評価）が必要になる。
+# フォーム一覧の取得だけのために要求していたため、URLを貼ってもらう方式に変えて外した。
 SCOPES = [
     "openid",
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
-    "https://www.googleapis.com/auth/drive.metadata.readonly",
     "https://www.googleapis.com/auth/forms.body.readonly",
     "https://www.googleapis.com/auth/forms.responses.readonly",
 ]

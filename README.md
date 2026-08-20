@@ -17,7 +17,7 @@
 ## 主な機能
 
 - Googleアカウントでログイン(OAuth 2.0)
-- Google Drive APIによるGoogleフォーム一覧の取得
+- フォームのURLを貼るだけの管理対象登録(Google Driveへのアクセスは不要)
 - 管理対象フォームの選択(追加・除外。除外してもデータは残る)
 - 複数フォームの回答をGoogle Forms APIで一括取得し、新しい順に一覧表示
 - 未読・既読管理(詳細を開くと自動で既読)
@@ -35,7 +35,7 @@
 |---|---|
 | ログイン | アプリ説明とGoogleログインボタン |
 | 受信箱(トップ) | 3カラム構成。左:絞り込みナビ / 中央:問い合わせ一覧 / 右:詳細。上部に件数カードと「回答を更新」ボタン |
-| フォーム管理 | Googleフォーム一覧と管理対象の追加・除外 |
+| フォーム管理 | フォームURLからの登録と、管理対象の追加・除外 |
 | 設定 | アカウント情報・管理対象一覧・件数の再計算 |
 
 スマートフォンでは一覧から詳細画面へ切り替わる1カラム表示になります。
@@ -46,7 +46,7 @@
 - フロントエンド: HTML / CSS / JavaScript(fetch API)
 - データベース: Firebase Cloud Firestore(Firebase Admin SDK for Python)
 - 認証: Google OAuth 2.0
-- Google API: Google Drive API(フォーム一覧)/ Google Forms API(フォーム情報・回答)
+- Google API: Google Forms API(フォーム情報・回答)
 - リアルタイム通知: Google Forms Watches API / Cloud Pub/Sub / Server-Sent Events
 - CSRF対策: Flask-WTF
 - 本番環境: Ubuntu VPS + Gunicorn + Nginx
@@ -62,7 +62,7 @@ app/
   extensions.py        # Flask-WTF CSRF
   auth/                # ログイン・OAuth・デコレーター
   dashboard/           # 受信箱・設定画面
-  forms/               # フォーム管理・Drive/Forms API・同期処理
+  forms/               # フォーム管理・Forms API・同期処理
   responses/           # 回答一覧・詳細・更新API
   repositories/        # Firestoreの読み書き(Repository層)
   services/            # 回答解析・件数集計
@@ -120,7 +120,7 @@ http://localhost:5000 を開き、「Googleでログイン」を押すとモッ�
 `.env`に `MOCK_MODE=true` を設定すると、以下の状態で動作します。
 
 - Googleログインを省略(ボタンを押すとモックユーザーでログイン)
-- Firebase・Google Drive API・Google Forms APIへ一切接続しない
+- Firebase・Google Forms APIへ一切接続しない
 - ダミーのフォーム3件と問い合わせ(未読・既読・各対応状況・重要・メモあり等)を表示
 - ステータス変更・既読・重要・メモの操作をUI上で確認できる
 - 「回答を更新」を押すと初回のみ新しい回答が1件追加される
@@ -172,7 +172,6 @@ FIREBASE_CREDENTIALS_PATH=./firebase-service-account.json
 https://console.cloud.google.com/ でFirebaseと同じプロジェクトを選択し、
 「APIとサービス」→「ライブラリ」から以下を有効化します。
 
-- **Google Drive API**(フォーム一覧の取得に使用)
 - **Google Forms API**(フォーム情報・回答の取得に使用)
 
 ### OAuth同意画面の設定
@@ -249,10 +248,13 @@ Google Formsのwatchは7日で期限切れになります。受信箱を開い�
 
 必要最小限の読み取り専用スコープのみ要求します(フォームの作成・編集・削除の権限は要求しません)。
 
+Google Driveのスコープは要求しません。以前は`drive.metadata.readonly`でフォーム一覧を取得していましたが、
+これは**制限付きスコープ**で、Googleの検証にCASA(有償の第三者セキュリティ評価・年次更新)が必要になります。
+一覧のためだけに検証の負担を負う理由がないため、利用者にフォームのURLを貼ってもらう方式へ変更しました。
+
 | スコープ | 用途 |
 |---|---|
 | `openid` / `userinfo.email` / `userinfo.profile` | ログインユーザーの識別 |
-| `https://www.googleapis.com/auth/drive.metadata.readonly` | Googleフォーム一覧の取得(メタデータのみ) |
 | `https://www.googleapis.com/auth/forms.body.readonly` | フォームの質問構成の取得 |
 | `https://www.googleapis.com/auth/forms.responses.readonly` | フォームの回答の取得 |
 

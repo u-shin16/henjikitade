@@ -13,7 +13,7 @@ from app.firebase_config import FirebaseConfigError
 from app.repositories import get_repositories
 from app.services import count_service, realtime
 
-from . import google_drive_api, sync_service, watch_service
+from . import form_url, google_forms_api, sync_service, watch_service
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +30,10 @@ def _is_valid_id(value):
 @login_required
 def forms_page():
     user_id = current_user_id()
-    user_repo, form_repo, _ = get_repositories()
+    _, form_repo, _ = get_repositories()
 
     try:
-        managed_forms = {f["form_id"]: f for f in form_repo.get_forms(user_id)}
+        managed_forms = form_repo.get_forms(user_id)
     except FirebaseConfigError:
         logger.exception("Firestoreへの接続に失敗しました")
         return render_template(
@@ -41,106 +41,95 @@ def forms_page():
             message="データベースへの接続に失敗しました。Firebaseの設定を確認してください",
         ), 500
 
-    drive_error = None
-    available_forms = []
-    if current_app.config.get("MOCK_MODE"):
-        available_forms = form_repo.store.get("available_forms", [])
-    else:
-        try:
-            credentials = get_user_credentials(user_repo, user_id)
-            available_forms = google_drive_api.list_google_forms(credentials)
-        except ReauthRequired:
-            drive_error = "Googleアカウントへの接続が切れました。もう一度ログインしてください"
-        except Exception:
-            logger.exception("Googleフォーム一覧の取得に失敗しました")
-            drive_error = "Googleフォーム一覧の取得に失敗しました。時間を空けて再度お試しください"
-
-    # Drive上のフォームと管理対象情報をマージして表示用リストを作る
     rows = []
-    seen_ids = set()
-    for f in available_forms:
-        form_id = f.get("id")
-        seen_ids.add(form_id)
-        managed = managed_forms.get(form_id)
-        rows.append({
-            "form_id": form_id,
-            "title": f.get("name", "無題のフォーム"),
-            "modified_time": f.get("modifiedTime"),
-            "web_view_link": f.get("webViewLink"),
-            "is_managed": managed is not None and managed.get("is_active", False),
-            "was_managed": managed is not None,
-            "response_count": (managed or {}).get("response_count", 0),
-            "unread_count": (managed or {}).get("unread_count", 0),
-            "unhandled_count": (managed or {}).get("unhandled_count", 0),
-            "last_synced_at": (managed or {}).get("last_synced_at"),
-            "missing_on_drive": False,
-        })
-
-    # Driveから取得できなかった管理対象フォーム(削除・権限喪失など)
-    for form_id, managed in managed_forms.items():
-        if form_id in seen_ids:
-            continue
+    for managed in managed_forms:
+        form_id = managed.get("form_id")
         rows.append({
             "form_id": form_id,
             "title": managed.get("title", "無題のフォーム"),
-            "modified_time": None,
-            "web_view_link": None,
+            "web_view_link": f"https://docs.google.com/forms/d/{form_id}/edit",
             "is_managed": managed.get("is_active", False),
             "was_managed": True,
             "response_count": managed.get("response_count", 0),
             "unread_count": managed.get("unread_count", 0),
             "unhandled_count": managed.get("unhandled_count", 0),
             "last_synced_at": managed.get("last_synced_at"),
-            "missing_on_drive": not current_app.config.get("MOCK_MODE"),
         })
 
     has_active = any(r["is_managed"] for r in rows)
 
-    return render_template(
-        "forms.html",
-        rows=rows,
-        drive_error=drive_error,
-        has_active=has_active,
-    )
+    return render_template("forms.html", rows=rows, has_active=has_active)
 
 
-@forms_bp.route("/api/forms/manage", methods=["POST"])
+@forms_bp.route("/api/forms/add-by-url", methods=["POST"])
 @login_required
-def add_managed_forms():
+def add_form_by_url():
+    """貼られたURLからフォームIDを取り出し、実在を確かめてから管理対象に追加する。"""
     user_id = current_user_id()
     payload = request.get_json(silent=True) or {}
-    forms = payload.get("forms") or []
-    if not isinstance(forms, list) or not forms:
-        return jsonify({"success": False, "message": "追加するフォームを選択してください"}), 400
 
-    _, form_repo, _ = get_repositories()
-    added = 0
-    added_form_ids = []
     try:
-        for f in forms:
-            form_id = (f or {}).get("id", "")
-            title = ((f or {}).get("title") or "無題のフォーム")[:300]
-            if not _is_valid_id(form_id):
-                continue
-            form_repo.add_form(user_id, form_id, title)
-            added += 1
-            added_form_ids.append(form_id)
-        if added_form_ids:
-            watch_service.ensure_response_watches(user_id, added_form_ids)
+        form_id = form_url.extract_form_id(payload.get("url"))
+    except form_url.FormUrlError as err:
+        return jsonify({"success": False, "message": str(err)}), 400
+
+    user_repo, form_repo, _ = get_repositories()
+
+    try:
+        existing = {f["form_id"] for f in form_repo.get_forms(user_id)}
+    except FirebaseConfigError:
+        logger.exception("管理対象フォームの取得に失敗しました")
+        return jsonify({"success": False, "message": "データベースへの接続に失敗しました"}), 500
+
+    if form_id in existing:
+        return jsonify({
+            "success": False,
+            "message": "そのフォームはすでに登録されています",
+        }), 409
+
+    # 登録前にForms APIで開けることを確かめる。開けないIDを登録すると、
+    # 受信箱に出てくるのに永久に同期できないフォームが残ってしまう。
+    if current_app.config.get("MOCK_MODE"):
+        title = "テスト用フォーム"
+    else:
+        try:
+            credentials = get_user_credentials(user_repo, user_id)
+            form = google_forms_api.get_form(credentials, form_id)
+        except ReauthRequired:
+            return jsonify({
+                "success": False,
+                "message": "Googleアカウントへの接続が切れました。もう一度ログインしてください",
+                "data": {"need_login": True},
+            }), 401
+        except Exception:
+            logger.info("フォームを開けませんでした (user=%s form=%s)", user_id, form_id, exc_info=True)
+            return jsonify({
+                "success": False,
+                "message": (
+                    "そのフォームを開けませんでした。"
+                    "ログイン中のGoogleアカウントで作成したフォームか確認してください"
+                ),
+            }), 404
+        title = (form.get("info", {}).get("title") or "無題のフォーム")[:300]
+
+    try:
+        form_repo.add_form(user_id, form_id, title)
     except FirebaseConfigError:
         logger.exception("管理対象フォームの登録に失敗しました")
         return jsonify({"success": False, "message": "データベースへの接続に失敗しました"}), 500
+
+    try:
+        watch_service.ensure_response_watches(user_id, [form_id])
     except ReauthRequired:
         logger.info("watch登録のためのGoogle認証が切れています (user=%s)", user_id)
     except Exception:
+        # watchが張れなくても手動同期で回答は取れるため、登録自体は成功として扱う
         logger.exception("フォームwatchの登録に失敗しました")
 
-    if added == 0:
-        return jsonify({"success": False, "message": "フォームを登録できませんでした"}), 400
     return jsonify({
         "success": True,
-        "message": f"{added}件のフォームを管理対象に追加しました",
-        "data": {"added": added},
+        "message": f"「{title}」を管理対象に追加しました",
+        "data": {"form_id": form_id, "title": title},
     })
 
 

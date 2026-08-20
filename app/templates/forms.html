@@ -16,18 +16,29 @@
   <div class="page-body">
     {% if not has_active %}
     <div class="onboarding-card">
-      <h2>管理するGoogleフォームを選択してください</h2>
-      <p>チェックボックスでフォームを選び、「管理対象に追加」を押すと、届いた回答を受信箱でまとめて確認できるようになります。</p>
+      <h2>管理するGoogleフォームを登録してください</h2>
+      <p>Googleフォームの編集画面を開き、そのURLをコピーして下の欄に貼ってください。登録すると、届いた回答を受信箱でまとめて確認できるようになります。</p>
     </div>
     {% endif %}
 
-    {% if drive_error %}
-    <div class="flash flash-error">{{ drive_error }}</div>
-    {% endif %}
-
-    <div class="forms-actions">
-      <button id="add-selected-btn" class="btn btn-primary" disabled>管理対象に追加</button>
-      <span id="selected-count" class="selected-count"></span>
+    <div class="form-add-card">
+      <label for="form-url-input" class="form-add-label">フォームのURL</label>
+      <div class="form-add-row">
+        <input
+          type="url"
+          id="form-url-input"
+          class="form-add-input"
+          placeholder="https://docs.google.com/forms/d/.../edit"
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <button id="add-form-btn" class="btn btn-primary">登録する</button>
+      </div>
+      <p class="form-add-hint">
+        フォームの編集画面を開いたときのURLをそのまま貼ってください。
+        回答者に配る「forms.gle」の短縮URLや、末尾が「/viewform」のURLは使えません。
+      </p>
+      <p id="form-add-error" class="form-add-error" hidden></p>
     </div>
 
     {% if rows %}
@@ -35,9 +46,7 @@
       <table class="forms-table">
         <thead>
           <tr>
-            <th class="col-check"></th>
             <th>フォーム名</th>
-            <th>最終更新</th>
             <th>最終同期</th>
             <th class="col-num">回答</th>
             <th class="col-num">未読</th>
@@ -49,19 +58,10 @@
         <tbody>
           {% for row in rows %}
           <tr data-form-id="{{ row.form_id }}" data-form-title="{{ row.title }}">
-            <td class="col-check">
-              {% if not row.is_managed %}
-              <input type="checkbox" class="form-check" aria-label="選択">
-              {% endif %}
-            </td>
             <td>
               <span class="form-title">{{ row.title }}</span>
-              {% if row.missing_on_drive %}
-              <span class="badge badge-warn">Driveで見つかりません</span>
-              {% endif %}
               <div class="form-id-note">ID: {{ row.form_id }}</div>
             </td>
-            <td>{{ row.modified_time | jpdatetime if row.modified_time else "-" }}</td>
             <td>{{ row.last_synced_at | jpdatetime if row.last_synced_at else "未同期" }}</td>
             <td class="col-num">{{ row.response_count }}</td>
             <td class="col-num">{{ row.unread_count }}</td>
@@ -71,8 +71,6 @@
               <span class="badge badge-active">管理中</span>
               {% elif row.was_managed %}
               <span class="badge badge-muted">停止中</span>
-              {% else %}
-              <span class="badge badge-muted">未管理</span>
               {% endif %}
             </td>
             <td class="form-row-actions">
@@ -92,7 +90,7 @@
     </div>
     {% else %}
     <div class="empty-state">
-      <p>Googleフォームが見つかりませんでした。</p>
+      <p>まだフォームを登録していません。上の欄にフォームのURLを貼って登録してください。</p>
     </div>
     {% endif %}
   </div>
