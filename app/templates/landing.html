@@ -1,18 +1,12 @@
-{% extends "base.html" %}
+{% extends "public_base.html" %}
 {% block title %}{{ APP_NAME }}｜複数のGoogleフォームの回答を1か所で管理する無料ツール{% endblock %}
 
 {% block description %}<meta name="description" content="複数のGoogleフォームに届いた回答を1つの受信箱にまとめて確認できる無料ツールです。未対応・対応中・対応済みの状況管理、メモ、検索に対応。フォームのURLを貼るだけで使えます。">{% endblock %}
 
-{% block canonical %}<link rel="canonical" href="{{ absolute_url('public.landing') }}">{% endblock %}
+{% block og_title %}{{ APP_NAME }}｜複数のGoogleフォームの回答を1か所で管理{% endblock %}
+{% block og_description %}複数のGoogleフォームに届いた回答を1つの受信箱にまとめて確認できる無料ツール。対応状況の管理とメモに対応。{% endblock %}
 
-{% block head_extra %}
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="{{ APP_NAME }}｜複数のGoogleフォームの回答を1か所で管理">
-  <meta property="og:description" content="複数のGoogleフォームに届いた回答を1つの受信箱にまとめて確認できる無料ツール。対応状況の管理とメモに対応。">
-  <meta property="og:url" content="{{ absolute_url('public.landing') }}">
-  <meta property="og:image" content="{{ absolute_url('static', filename='img/icon-192.png') }}">
-  <meta name="twitter:card" content="summary">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% block public_head %}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -27,22 +21,7 @@
   </script>
 {% endblock %}
 
-{% block body %}
-<header class="lp-header">
-  <div class="lp-container lp-header-inner">
-    <a href="{{ url_for('public.landing') }}" class="lp-brand">
-      <img src="{{ url_for('static', filename='img/app-icon-64.png') }}" alt="" width="28" height="28">
-      <span>{{ APP_NAME }}</span>
-    </a>
-    {% if logged_in %}
-      <a href="{{ url_for('dashboard.index') }}" class="lp-header-cta">受信箱へ</a>
-    {% else %}
-      <a href="{{ url_for('auth.login') }}" class="lp-header-cta">はじめる</a>
-    {% endif %}
-  </div>
-</header>
-
-<main>
+{% block public_body %}
   <section class="lp-hero">
     <div class="lp-container">
       <h1>フォームが増えるほど、回答は見落とされる</h1>
@@ -161,6 +140,18 @@
     </div>
   </section>
 
+  <section class="lp-section lp-section-alt">
+    <div class="lp-container lp-narrow">
+      <h2>もっと詳しく</h2>
+      <ul class="lp-list">
+        <li><a href="{{ url_for('public.how_to_use') }}">使い方</a>：登録から対応状況の管理までの手順</li>
+        <li><a href="{{ url_for('public.faq') }}">よくある質問</a>：料金・権限・回答が出てこないときの対処</li>
+        <li><a href="{{ url_for('public.about') }}">このアプリについて</a>：作った理由とデータの扱い</li>
+        <li><a href="{{ url_for('public.contact') }}">お問い合わせ</a>：不具合の報告と要望</li>
+      </ul>
+    </div>
+  </section>
+
   <section class="lp-final">
     <div class="lp-container">
       <h2>無料で使えます</h2>
@@ -168,18 +159,4 @@
       <a href="{{ url_for('auth.login') }}" class="lp-cta">Googleアカウントで無料ではじめる</a>
     </div>
   </section>
-</main>
-
-<footer class="lp-footer">
-  <div class="lp-container">
-    <nav class="lp-footer-links">
-      <a href="{{ url_for('auth.terms') }}">利用規約</a>
-      <a href="{{ url_for('auth.privacy') }}">プライバシーポリシー</a>
-      <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener noreferrer">お問い合わせ</a>
-      <a href="https://webtool-labs.com/operator.html" target="_blank" rel="noopener noreferrer">運営者情報</a>
-      <a href="https://webtool-labs.com/" target="_blank" rel="noopener noreferrer">RakuYade</a>
-    </nav>
-    <p class="lp-copyright">{{ APP_NAME }} — RakuYade</p>
-  </div>
-</footer>
 {% endblock %}

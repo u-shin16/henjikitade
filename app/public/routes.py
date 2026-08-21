@@ -24,16 +24,53 @@ def absolute_url(endpoint, **values):
 # sitemap.xmlに載せる公開ページ。ログイン後にしか意味を持たないページは載せない。
 PUBLIC_PAGES = [
     ("public.landing", "1.0"),
+    ("public.how_to_use", "0.7"),
+    ("public.faq", "0.7"),
+    ("public.about", "0.4"),
+    ("public.contact", "0.4"),
     ("auth.privacy", "0.3"),
     ("auth.terms", "0.3"),
 ]
+
+
+def _render_public(template, endpoint):
+    """公開ページ共通の変数を渡す。
+
+    canonical_endpoint はcanonicalとog:urlに使う。
+    logged_in はヘッダーの導線を「はじめる」か「受信箱へ」かの出し分けに使う。
+    """
+    return render_template(
+        template,
+        canonical_endpoint=endpoint,
+        logged_in=bool(session.get("user_id")),
+    )
 
 
 @public_bp.route("/")
 def landing():
     # ログイン済みの人には「はじめる」ではなく受信箱への導線を出す。
     # 以前は`/`が受信箱だったため、ブックマークから来る人がいる。
-    return render_template("landing.html", logged_in=bool(session.get("user_id")))
+    return _render_public("landing.html", "public.landing")
+
+
+@public_bp.route("/how-to-use")
+def how_to_use():
+    return _render_public("how_to_use.html", "public.how_to_use")
+
+
+@public_bp.route("/faq")
+def faq():
+    return _render_public("faq.html", "public.faq")
+
+
+@public_bp.route("/about")
+def about():
+    return _render_public("about.html", "public.about")
+
+
+@public_bp.route("/contact")
+def contact():
+    return _render_public("contact.html", "public.contact")
 
 
 @public_bp.route("/robots.txt")

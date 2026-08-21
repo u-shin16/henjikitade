@@ -1,0 +1,78 @@
+{% extends "public_base.html" %}
+{% block title %}このアプリについて｜{{ APP_NAME }}{% endblock %}
+{% block description %}<meta name="description" content="返事きたでを作った理由と、何をするアプリなのか。運営者、料金と広告の方針、データの扱いについて説明します。">{% endblock %}
+{% block og_title %}このアプリについて｜{{ APP_NAME }}{% endblock %}
+{% block og_description %}返事きたでを作った理由と、運営・料金・データの扱いについて。{% endblock %}
+
+{% block public_body %}
+<section class="lp-page-head">
+  <div class="lp-container lp-narrow">
+    <h1>このアプリについて</h1>
+    <p class="lp-page-lead">
+      {{ APP_NAME }}は、複数のGoogleフォームに届いた回答を1か所で確認し、
+      対応状況を管理するための無料のWebアプリです。
+    </p>
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="lp-container lp-narrow">
+    <h2>作った理由</h2>
+    <p>
+      Googleフォームは1つ作るのは簡単ですが、用途ごとに増やしていくと確認先が散らばります。
+      問い合わせ用、申込用、アンケート用と分けた結果、
+      <strong>回答を見るためにスプレッドシートを何枚も開く</strong>ことになる。
+    </p>
+    <p>
+      さらに面倒なのは、回答一覧には「もう返事をしたか」が書かれていないことです。
+      対応済みかどうかは自分の記憶か、別に用意したメモに頼ることになります。
+      件数が増えるほど、返事の抜けは気づかないまま起きます。
+    </p>
+    <p>
+      {{ APP_NAME }}は、この2つ——<strong>確認先が散らばること</strong>と
+      <strong>対応の記録が残らないこと</strong>——だけを解決するために作りました。
+      フォームの作成や集計は本家のGoogleフォームのほうが優れているので、そこには手を出していません。
+    </p>
+
+    <h2>できること・できないこと</h2>
+    <ul class="lp-list">
+      <li><strong>できる</strong>：複数フォームの回答を1つの受信箱にまとめる</li>
+      <li><strong>できる</strong>：回答ごとに対応状況（未対応・対応中・対応済み・保留）とメモを残す</li>
+      <li><strong>できる</strong>：回答の中身から検索する、フォームや期間で絞り込む</li>
+      <li><strong>できない</strong>：フォームの作成・編集・削除（読み取り専用のため）</li>
+      <li><strong>できない</strong>：回答者への返信の送信（メールソフトなどをお使いください）</li>
+      <li><strong>できない</strong>：複数のGoogleアカウントのフォームを1つの受信箱にまとめること</li>
+    </ul>
+
+    <h2>データの扱い</h2>
+    <p>
+      Googleに求める権限は、登録したフォームの<strong>質問と回答を読み取るだけ</strong>のものです。
+      取得した回答はログインしたご本人の画面にのみ表示され、第三者に共有しません。
+      広告配信や機械学習の学習データに使うこともありません。
+      詳細は<a href="{{ url_for('auth.privacy') }}">プライバシーポリシー</a>に記載しています。
+    </p>
+
+    <h2>料金と広告</h2>
+    <p>
+      無料です。現時点で有料プランの予定はありません。
+      受信箱には回答者の個人情報が表示されるため、<strong>ログイン後の画面に広告は出しません</strong>。
+    </p>
+
+    <h2>運営</h2>
+    <p>
+      個人開発者 u-shin が、複数のWebアプリを公開している
+      <a href="https://webtool-labs.com/" target="_blank" rel="noopener noreferrer">RakuYade</a>
+      の1つとして運営しています。
+      運営者の情報は<a href="https://webtool-labs.com/operator.html" target="_blank" rel="noopener noreferrer">運営者情報</a>をご確認ください。
+    </p>
+
+    <h2>これから</h2>
+    <p>
+      いま優先しているのは、初めて使う人が迷わない画面にすることと、
+      Googleの審査を通して<strong>ログイン時の警告画面をなくすこと</strong>です。
+      要望は<a href="{{ url_for('public.contact') }}">お問い合わせ</a>から受け付けています。
+      個人で運営しているため、すべてに対応できるとは限りませんが、必ず目を通しています。
+    </p>
+  </div>
+</section>
+{% endblock %}

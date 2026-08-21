@@ -1,0 +1,108 @@
+{% extends "public_base.html" %}
+{% block title %}使い方｜{{ APP_NAME }}{% endblock %}
+{% block description %}<meta name="description" content="返事きたでの使い方を手順ごとに説明します。Googleフォームの登録に使うURLの見分け方、受信箱での確認、対応状況の管理、メモの残し方、新着の取り込みまで。">{% endblock %}
+{% block og_title %}使い方｜{{ APP_NAME }}{% endblock %}
+{% block og_description %}フォームの登録から対応状況の管理まで、返事きたでの使い方を手順ごとに説明します。{% endblock %}
+
+{% block public_body %}
+<section class="lp-page-head">
+  <div class="lp-container lp-narrow">
+    <h1>使い方</h1>
+    <p class="lp-page-lead">
+      登録はGoogleアカウントでのログインだけです。ここでは、フォームを登録して回答を確認し、
+      対応状況を管理するところまでを順に説明します。
+    </p>
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="lp-container lp-narrow">
+    <ol class="lp-steps">
+      <li>
+        <h2>Googleアカウントでログインする</h2>
+        <p>
+          パスワードの登録はありません。<strong>フォームを作ったアカウント</strong>でログインしてください。
+          別のアカウントでログインすると、そのアカウントが持っていないフォームは登録できません。
+        </p>
+      </li>
+      <li>
+        <h2>フォームのURLを貼って登録する</h2>
+        <p>
+          「フォーム」タブを開き、Googleフォームの<strong>編集画面のURL</strong>を貼って「登録する」を押します。
+          登録すると、そのフォームに届いた回答が受信箱に集まります。
+        </p>
+        <div class="lp-callout">
+          <h3>使えるURLと使えないURL</h3>
+          <ul class="lp-list">
+            <li>
+              <strong>使える</strong>：<code>docs.google.com/forms/d/&lt;ID&gt;/edit</code><br>
+              自分がフォームを編集するときに開くURLです。末尾が <code>/edit</code> になっています。
+            </li>
+            <li>
+              <strong>使えない</strong>：<code>docs.google.com/forms/d/e/&lt;別のID&gt;/viewform</code><br>
+              回答者に配る回答用URLです。ここに入っているIDは編集用のIDとは<strong>別物</strong>のため、
+              登録しても回答を取得できません。貼った時点で理由を表示して止めます。
+            </li>
+            <li>
+              <strong>使えない</strong>：<code>forms.gle/…</code> の短縮URL<br>
+              短縮URLからは元のIDが分からないため使えません。
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <h2>受信箱で回答を確認する</h2>
+        <p>
+          登録したフォームの回答が新しい順に並びます。どのフォームに届いたものかは各行の上に出ます。
+          1件を選ぶと右側に詳細が開き、質問と回答が並んで表示されます。
+        </p>
+      </li>
+      <li>
+        <h2>対応状況を変える</h2>
+        <p>
+          回答ごとに<strong>未対応・対応中・対応済み・保留</strong>を設定できます。
+          上部の「未対応」を押せば、まだ手を付けていないものだけを残せます。
+          あとで見返したいものには重要マークを付けられます。
+        </p>
+      </li>
+      <li>
+        <h2>メモを残す</h2>
+        <p>
+          「電話で折り返した」「担当に転送済み」といった対応の記録を、回答に紐づけて残せます。
+          メモは自分の画面にだけ表示され、回答した人には見えません。
+        </p>
+      </li>
+      <li>
+        <h2>新しい回答を取り込む</h2>
+        <p>
+          フォームに新しい回答が届くと自動で受信箱へ取り込みます。
+          すぐに反映したいときは、受信箱の右上にある「回答を更新」を押してください。
+        </p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="lp-section lp-section-alt">
+  <div class="lp-container lp-narrow">
+    <h2>うまくいかないとき</h2>
+    <p>
+      回答が出てこない、ログインで止まるといった症状は
+      <a href="{{ url_for('public.faq') }}">よくある質問</a>にまとめています。
+      そこで解決しない場合は<a href="{{ url_for('public.contact') }}">お問い合わせ</a>から連絡してください。
+    </p>
+  </div>
+</section>
+
+<section class="lp-final">
+  <div class="lp-container">
+    <h2>無料で使えます</h2>
+    <p>登録料も利用料もかかりません。</p>
+    {% if logged_in %}
+    <a href="{{ url_for('dashboard.index') }}" class="lp-cta">受信箱を開く</a>
+    {% else %}
+    <a href="{{ url_for('auth.login') }}" class="lp-cta">Googleアカウントではじめる</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

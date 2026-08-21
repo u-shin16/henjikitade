@@ -265,3 +265,105 @@
   .lp-section h2, .lp-final h2 { font-size: 21px; }
   .lp-cta { display: block; padding: 15px 20px; }
 }
+
+/* ============================================================
+   兄弟ページ（使い方・よくある質問・このアプリについて・お問い合わせ）
+   ============================================================ */
+
+/* ヘッダーのサイト内ナビ */
+.lp-nav {
+  display: flex;
+  gap: 18px;
+  margin-left: auto;
+  margin-right: 20px;
+}
+.lp-nav a {
+  font-size: 14px;
+  color: var(--text-sub);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.lp-nav a:hover { color: var(--accent); }
+
+/* ページ見出し */
+.lp-page-head {
+  background: linear-gradient(180deg, var(--accent-light), var(--bg));
+  padding: 56px 0 40px;
+}
+.lp-page-head h1 {
+  margin: 0 0 16px;
+  font-size: 30px;
+  line-height: 1.35;
+}
+.lp-page-lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.95;
+  color: var(--text-sub);
+}
+
+/* 本文の見出しと段落 */
+.lp-narrow h2 {
+  margin: 40px 0 14px;
+  font-size: 20px;
+  text-align: left;
+}
+.lp-narrow h2:first-child { margin-top: 0; }
+.lp-narrow h3 { margin: 0 0 8px; font-size: 15px; }
+.lp-narrow code {
+  padding: 1px 5px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 13px;
+  word-break: break-all;
+}
+
+/* 手順の中に見出しを入れる場合 */
+.lp-steps h2 { margin: 4px 0 8px; font-size: 17px; }
+
+/* 補足の囲み */
+.lp-callout {
+  margin: 14px 0 0;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+.lp-callout .lp-list { margin-bottom: 0; }
+
+.lp-note-block {
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+/* よくある質問 */
+.lp-faq { margin: 0; }
+.lp-faq-item {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+.lp-faq-item:first-child { padding-top: 0; }
+.lp-faq dt {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.lp-faq dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.95;
+  color: var(--text-sub);
+}
+
+@media (max-width: 700px) {
+  .lp-nav { display: none; }
+  .lp-page-head { padding: 40px 0 30px; }
+  .lp-page-head h1 { font-size: 24px; }
+  .lp-narrow h2 { font-size: 18px; }
+}

@@ -1,0 +1,82 @@
+{% extends "public_base.html" %}
+{% block title %}よくある質問｜{{ APP_NAME }}{% endblock %}
+{% block description %}<meta name="description" content="返事きたでによくある質問。料金、回答者への影響、回答が表示されないとき、Googleの権限、警告画面が出る理由、アカウント削除時のデータの扱いについて答えます。">{% endblock %}
+{% block og_title %}よくある質問｜{{ APP_NAME }}{% endblock %}
+{% block og_description %}料金、権限、回答が出てこないときの対処など、返事きたでによくある質問に答えます。{% endblock %}
+
+{% set faqs = [
+  ("無料ですか。あとから課金されますか。",
+   "無料です。登録料も利用料もかかりません。現時点で有料プランの予定もありません。"),
+  ("フォームに回答した人に、何か通知や表示はされますか。",
+   "ありません。返事きたでは回答を読み取るだけで、フォーム側には何も書き込みません。回答者から見て、このアプリを使っているかどうかは分かりません。"),
+  ("対応状況やメモは、回答した人に見えますか。",
+   "見えません。対応状況とメモは返事きたでの中だけに保存され、Googleフォームには書き戻しません。表示されるのはログインしたご本人の画面だけです。"),
+  ("フォームを登録したのに、回答が受信箱に出てきません。",
+   "貼ったURLが回答用URL（末尾が /viewform）だった可能性があります。回答用URLに入っているIDは編集用のIDとは別物のため、回答を取得できません。フォームの編集画面を開き、末尾が /edit のURLを貼り直してください。それでも出てこない場合は、受信箱の「回答を更新」を押して手動で取り込んでみてください。"),
+  ("「このアプリは Google で確認されていません」と出ます。使って大丈夫ですか。",
+   "Googleの審査を申請中のため、通過するまでこの画面が出ます。「詳細」→「安全ではないページに移動」で先へ進めます。返事きたでが求めるのは読み取り専用の権限だけで、フォームの作成・編集・削除や回答の送信は行いません。"),
+  ("どんな権限を使いますか。",
+   "登録したフォームの質問内容と回答を読み取る権限、それにアカウントの名前とメールアドレスだけです。いずれも読み取り専用です。Googleドライブ全体を見る権限は求めません。権限はGoogleアカウントの画面からいつでも取り消せます。"),
+  ("フォームを登録から外すと、回答のデータはどうなりますか。",
+   "受信箱から表示されなくなります。Googleフォーム側の回答が消えることはありません。もう一度登録すれば、また受信箱に表示されます。"),
+  ("複数のGoogleアカウントで使えますか。",
+   "使えます。ただし受信箱はアカウントごとに分かれます。1つの受信箱に別アカウントのフォームをまとめることはできません。フォームを持っているアカウントでログインしてください。"),
+  ("アカウントを削除すると、データはどうなりますか。",
+   "返事きたでに保存した管理フォーム、回答、メモ、設定をすべて削除します。この操作は取り消せません。Googleフォーム側の回答は削除されません。"),
+  ("スマートフォンでも使えますか。",
+   "使えます。アプリのインストールは不要で、ブラウザからそのまま利用できます。")
+] %}
+
+{% block public_head %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {% for q, a in faqs %}
+      {
+        "@type": "Question",
+        "name": {{ q | tojson }},
+        "acceptedAnswer": { "@type": "Answer", "text": {{ a | tojson }} }
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+  </script>
+{% endblock %}
+
+{% block public_body %}
+<section class="lp-page-head">
+  <div class="lp-container lp-narrow">
+    <h1>よくある質問</h1>
+    <p class="lp-page-lead">
+      使いはじめる前に迷いやすいところと、実際に届いた質問をまとめています。
+      ここで解決しない場合は<a href="{{ url_for('public.contact') }}">お問い合わせ</a>から連絡してください。
+    </p>
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="lp-container lp-narrow">
+    <dl class="lp-faq">
+      {% for q, a in faqs %}
+      <div class="lp-faq-item">
+        <dt>{{ q }}</dt>
+        <dd>{{ a }}</dd>
+      </div>
+      {% endfor %}
+    </dl>
+  </div>
+</section>
+
+<section class="lp-section lp-section-alt">
+  <div class="lp-container lp-narrow">
+    <h2>関連するページ</h2>
+    <ul class="lp-list">
+      <li><a href="{{ url_for('public.how_to_use') }}">使い方</a>：登録から対応状況の管理までの手順</li>
+      <li><a href="{{ url_for('auth.privacy') }}">プライバシーポリシー</a>：取得する情報と権限の詳細</li>
+      <li><a href="{{ url_for('public.contact') }}">お問い合わせ</a>：不具合の報告と要望</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}

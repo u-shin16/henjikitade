@@ -1,0 +1,59 @@
+{% extends "public_base.html" %}
+{% block title %}お問い合わせ｜{{ APP_NAME }}{% endblock %}
+{% block description %}<meta name="description" content="返事きたでへの不具合報告・要望の窓口です。連絡前に確認したいことと、報告に書いていただきたい内容をまとめています。">{% endblock %}
+{% block og_title %}お問い合わせ｜{{ APP_NAME }}{% endblock %}
+{% block og_description %}不具合の報告と要望の窓口。報告に書いていただきたい内容もまとめています。{% endblock %}
+
+{% block public_body %}
+<section class="lp-page-head">
+  <div class="lp-container lp-narrow">
+    <h1>お問い合わせ</h1>
+    <p class="lp-page-lead">
+      不具合の報告と、機能の要望を受け付けています。個人で運営しているため、
+      返信までに数日いただくことがあります。
+    </p>
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="lp-container lp-narrow">
+    <h2>先に確認してください</h2>
+    <p>
+      よく届く内容は<a href="{{ url_for('public.faq') }}">よくある質問</a>にまとめています。
+      とくに次の2つは、多くの場合そちらで解決します。
+    </p>
+    <ul class="lp-list">
+      <li><strong>回答が受信箱に出てこない</strong>：貼ったURLが回答用URLだった可能性があります</li>
+      <li><strong>「Googleで確認されていません」と出る</strong>：審査を申請中のため表示されます</li>
+    </ul>
+
+    <h2>不具合を報告するとき</h2>
+    <p>次の4つがあると、原因を特定できる可能性が大きく上がります。</p>
+    <ul class="lp-list">
+      <li><strong>何をしたか</strong>（例：フォームのURLを貼って「登録する」を押した）</li>
+      <li><strong>何が起きたか</strong>（例：「取得できませんでした」と表示された）</li>
+      <li><strong>いつ頃か</strong>（日付と、分かればおおよその時刻）</li>
+      <li><strong>使った環境</strong>（パソコンかスマホか、ブラウザの種類）</li>
+    </ul>
+    <p class="lp-note-block">
+      画面のスクリーンショットを添えていただける場合は、
+      <strong>回答者の氏名やメールアドレスが写らないよう</strong>ご注意ください。
+      不具合の調査に第三者の個人情報は必要ありません。
+    </p>
+
+    <h2>要望を送るとき</h2>
+    <p>
+      「こうしてほしい」だけでなく、<strong>どんな場面で困っているか</strong>を書いていただけると助かります。
+      同じ困りごとを、思っていたのと違う方法で解決できることがあるためです。
+    </p>
+  </div>
+</section>
+
+<section class="lp-final">
+  <div class="lp-container">
+    <h2>問い合わせフォーム</h2>
+    <p>下のフォームから送信してください。Googleフォームが開きます。</p>
+    <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener noreferrer" class="lp-cta">問い合わせフォームを開く</a>
+  </div>
+</section>
+{% endblock %}
