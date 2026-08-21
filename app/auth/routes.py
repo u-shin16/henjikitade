@@ -34,12 +34,15 @@ def login():
 
 @auth_bp.route("/privacy")
 def privacy():
-    return render_template("privacy.html")
+    # 公開ページなので紹介ページと同じ外枠を使う。canonicalとog:urlに使う値を渡す。
+    from app.public.routes import render_public
+    return render_public("privacy.html", "auth.privacy")
 
 
 @auth_bp.route("/terms")
 def terms():
-    return render_template("terms.html")
+    from app.public.routes import render_public
+    return render_public("terms.html", "auth.terms")
 
 
 @auth_bp.route("/auth/google")

@@ -1,7 +1,11 @@
-{% extends "base.html" %}
-{% block title %}プライバシーポリシー - {{ APP_NAME }}{% endblock %}
-{% block body %}
-<div class="legal-page">
+{% extends "public_base.html" %}
+{% block title %}プライバシーポリシー｜{{ APP_NAME }}{% endblock %}
+{% block description %}<meta name="description" content="返事きたでのプライバシーポリシー。取得する情報、Google APIのスコープ、回答データの取り扱い、第三者提供と保存期間について定めています。">{% endblock %}
+{% block og_title %}プライバシーポリシー｜{{ APP_NAME }}{% endblock %}
+{% block og_description %}返事きたでが取得する情報とGoogle APIのスコープ、回答データの取り扱いについて。{% endblock %}
+
+{% block public_body %}
+<div class="lp-container lp-narrow legal-page">
   <h1>プライバシーポリシー</h1>
   <p class="legal-updated">最終更新日：2026年7月31日</p>
 
@@ -67,7 +71,5 @@
     <h2>9. お問い合わせ</h2>
     <p>情報の取り扱いに関するご質問・開示・削除のご依頼は、<a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener noreferrer">お問い合わせフォーム</a>からご連絡ください。</p>
   </section>
-
-  <a href="{{ url_for('auth.login') }}" class="btn btn-ghost legal-back">ログイン画面へ戻る</a>
 </div>
 {% endblock %}

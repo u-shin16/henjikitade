@@ -1,7 +1,11 @@
-{% extends "base.html" %}
-{% block title %}利用規約 - {{ APP_NAME }}{% endblock %}
-{% block body %}
-<div class="legal-page">
+{% extends "public_base.html" %}
+{% block title %}利用規約｜{{ APP_NAME }}{% endblock %}
+{% block description %}<meta name="description" content="返事きたでの利用規約。サービスの内容、利用者の責任、禁止事項、免責事項について定めています。">{% endblock %}
+{% block og_title %}利用規約｜{{ APP_NAME }}{% endblock %}
+{% block og_description %}返事きたでのサービス内容、利用者の責任、禁止事項、免責事項について。{% endblock %}
+
+{% block public_body %}
+<div class="lp-container lp-narrow legal-page">
   <h1>利用規約</h1>
   <p class="legal-updated">最終更新日：2026年7月31日</p>
 
@@ -61,7 +65,5 @@
     <h2>第10条（お問い合わせ）</h2>
     <p>本規約に関するご質問は、<a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener noreferrer">お問い合わせフォーム</a>からご連絡ください。</p>
   </section>
-
-  <a href="{{ url_for('auth.login') }}" class="btn btn-ghost legal-back">ログイン画面へ戻る</a>
 </div>
 {% endblock %}

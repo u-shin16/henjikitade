@@ -28,13 +28,15 @@ class PublicPagesTestCase(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertEqual(self.client.get(path).status_code, 200)
 
-    def test_sibling_pages_have_own_canonical(self):
+    def test_public_pages_have_own_canonical(self):
         """canonicalが各ページ自身を指していること（全部トップを指すと重複扱いになる）。"""
         expected = {
             "/how-to-use": "https://henji.webtool-labs.com/how-to-use",
             "/faq": "https://henji.webtool-labs.com/faq",
             "/about": "https://henji.webtool-labs.com/about",
             "/contact": "https://henji.webtool-labs.com/contact",
+            "/privacy": "https://henji.webtool-labs.com/privacy",
+            "/terms": "https://henji.webtool-labs.com/terms",
         }
         for path, url in expected.items():
             with self.subTest(path=path):
@@ -45,7 +47,7 @@ class PublicPagesTestCase(unittest.TestCase):
         """メタディスクリプションが使い回しになっていないこと。"""
         import re
         seen = {}
-        for path in ["/", "/how-to-use", "/faq", "/about", "/contact"]:
+        for path in self.PUBLIC_PATHS:
             html = self.client.get(path).get_data(as_text=True)
             m = re.search(r'<meta name="description" content="([^"]+)"', html)
             self.assertIsNotNone(m, f"{path} にdescriptionが無い")
@@ -64,7 +66,7 @@ class PublicPagesTestCase(unittest.TestCase):
 
     def test_pages_link_to_each_other(self):
         """どのページからも兄弟ページへ辿れること。"""
-        for path in ["/", "/how-to-use", "/faq", "/about", "/contact"]:
+        for path in self.PUBLIC_PATHS:
             with self.subTest(path=path):
                 html = self.client.get(path).get_data(as_text=True)
                 for href in ["/how-to-use", "/faq", "/about", "/contact"]:

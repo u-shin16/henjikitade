@@ -33,7 +33,7 @@ PUBLIC_PAGES = [
 ]
 
 
-def _render_public(template, endpoint):
+def render_public(template, endpoint):
     """公開ページ共通の変数を渡す。
 
     canonical_endpoint はcanonicalとog:urlに使う。
@@ -50,27 +50,27 @@ def _render_public(template, endpoint):
 def landing():
     # ログイン済みの人には「はじめる」ではなく受信箱への導線を出す。
     # 以前は`/`が受信箱だったため、ブックマークから来る人がいる。
-    return _render_public("landing.html", "public.landing")
+    return render_public("landing.html", "public.landing")
 
 
 @public_bp.route("/how-to-use")
 def how_to_use():
-    return _render_public("how_to_use.html", "public.how_to_use")
+    return render_public("how_to_use.html", "public.how_to_use")
 
 
 @public_bp.route("/faq")
 def faq():
-    return _render_public("faq.html", "public.faq")
+    return render_public("faq.html", "public.faq")
 
 
 @public_bp.route("/about")
 def about():
-    return _render_public("about.html", "public.about")
+    return render_public("about.html", "public.about")
 
 
 @public_bp.route("/contact")
 def contact():
-    return _render_public("contact.html", "public.contact")
+    return render_public("contact.html", "public.contact")
 
 
 @public_bp.route("/robots.txt")
