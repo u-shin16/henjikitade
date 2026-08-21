@@ -47,3 +47,19 @@ def settings():
         flash("データベースへの接続に失敗しました", "error")
 
     return render_template("settings.html", user=user, managed_forms=managed_forms)
+
+
+@dashboard_bp.route("/account")
+@login_required
+def account():
+    """アカウント情報とアカウント削除。設定から分けて独立したタブにしている。"""
+    user_id = current_user_id()
+    user_repo, _, _ = get_repositories()
+    user = None
+    try:
+        user = user_repo.get_user(user_id)
+    except FirebaseConfigError:
+        logger.exception("アカウント画面のデータ取得に失敗しました")
+        flash("データベースへの接続に失敗しました", "error")
+
+    return render_template("account.html", user=user)

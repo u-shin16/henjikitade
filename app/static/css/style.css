@@ -135,14 +135,42 @@ h1, h2, h3 { margin: 0 0 8px; }
 body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
 
 .app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
+.app-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px 8px;
+}
+
+/* --- 主機能のタブ（受信箱・フォーム・設定・アカウント） --- */
+
+.app-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px;
+}
+.app-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-bottom: 2px solid transparent;
+  color: var(--text-sub);
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.app-tab:hover { color: var(--text); background: var(--bg); }
+.app-tab.is-active {
+  color: var(--accent-hover);
+  font-weight: 700;
+  border-bottom-color: var(--accent);
+}
+.app-tab-icon { font-size: 15px; }
 .header-left { display: flex; align-items: center; gap: 10px; }
 .app-logo-img {
   display: block;
@@ -164,23 +192,111 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
 
 .main-layout {
   display: grid;
-  grid-template-columns: 220px minmax(320px, 420px) 1fr;
+  grid-template-columns: minmax(320px, 420px) 1fr;
   gap: 12px;
-  padding: 12px 20px 16px;
+  padding: 0 20px 16px;
   flex: 1;
   min-height: 0;
 }
 
-.sidebar {
+/* --- 受信箱の絞り込み（旧・左サイドバー） --- */
+
+.inbox-filters {
+  padding: 12px 20px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.chip-row .nav-item {
+  width: auto;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 999px;
+  font-size: 13px;
+}
+.chip-row .nav-item.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.chip-row .nav-item.active .nav-count { background: rgba(255,255,255,0.25); color: #fff; }
+.chip-row-forms .nav-item { max-width: 240px; }
+
+.filter-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.filter-bar .search-input {
+  flex: 1;
+  min-width: 0;
+  max-width: 420px;
+}
+.filter-more > summary {
+  cursor: pointer;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text-sub);
+  list-style: none;
+  white-space: nowrap;
+}
+.filter-more > summary::-webkit-details-marker { display: none; }
+.filter-more > summary::after { content: " ▾"; }
+.filter-more[open] > summary::after { content: " ▴"; }
+/* 開いたときに一覧を押し下げないよう、重ねて出す */
+.filter-more-body {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 14px 16px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 10px;
-  overflow-y: auto;
+  box-shadow: 0 6px 20px rgba(38, 33, 46, 0.12);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 24px;
+}
+.filter-more-body .filter-group {
   display: flex;
   flex-direction: column;
+  gap: 6px;
 }
-.nav-list { list-style: none; margin: 0; padding: 0; }
+.filter-more-body .filter-label {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.filter-more-body select,
+.filter-more-body input[type="date"] {
+  width: auto;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+}
+.filter-more-body .date-range { display: flex; align-items: center; gap: 6px; }
+.filter-more-body .btn { align-self: flex-end; }
+
+
 .nav-item {
   display: flex;
   justify-content: space-between;
@@ -213,28 +329,9 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
   white-space: nowrap;
 }
 
-.sidebar-section-title {
-  font-size: 11px;
-  color: var(--text-sub);
-  margin: 14px 10px 4px;
-}
-.sidebar-section-title.first { margin-top: 0; }
-.sidebar-footer {
-  margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.sidebar-link {
-  padding: 6px 10px;
-  text-decoration: none;
-  color: var(--text-sub);
-  font-size: 13px;
-  border-radius: 8px;
-}
-.sidebar-link:hover { background: var(--bg); color: var(--text); }
+
+
+
 
 /* --- 中央: 問い合わせ一覧 --- */
 
@@ -243,16 +340,7 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
   flex-direction: column;
   min-height: 0;
 }
-.inbox-toolbar {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+
 .filter-row {
   display: flex;
   align-items: flex-end;
@@ -741,6 +829,17 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
 }
 
 @media (max-width: 600px) {
+  /* 状態チップが3行に折り返して縦を食うので、横スクロールにする */
+  .inbox-filters > .chip-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .inbox-filters > .chip-row::-webkit-scrollbar { display: none; }
+  .inbox-filters > .chip-row .nav-item { flex-shrink: 0; }
+  .filter-bar { flex-wrap: nowrap; }
+
   .form-add-row { flex-direction: column; align-items: stretch; }
 }
 
@@ -767,6 +866,11 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
 
 /* --- 設定画面 --- */
 
+.settings-note {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.8;
+}
 .settings-legal-links {
   display: flex;
   flex-wrap: wrap;
@@ -811,17 +915,20 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
     grid-template-columns: 1fr;
     padding: 10px;
   }
-  .sidebar { order: 0; max-height: 200px; }
   .inbox-panel { order: 1; }
   .detail-panel { display: none; }
 
   /* 詳細表示時は一覧の代わりに詳細を全面表示する */
-  .main-layout.show-detail .sidebar,
   .main-layout.show-detail .inbox-panel { display: none; }
   .main-layout.show-detail .detail-panel { display: block; }
   .detail-back { display: inline-flex; }
+  /* 詳細を見ているときは絞り込みを隠す */
+  body:has(.main-layout.show-detail) .inbox-filters { display: none; }
 
-  .app-header { flex-wrap: wrap; gap: 8px; }
+  .app-header-top { flex-wrap: wrap; gap: 8px; }
+  .inbox-filters { padding: 10px 10px 8px; }
+  .app-tabs { padding: 0 6px; overflow-x: auto; }
+  .app-tab { padding: 9px 12px; font-size: 13px; }
   .detail-meta { grid-template-columns: 1fr; }
   .function-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .detail-status-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
