@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 dashboard_bp = Blueprint("dashboard", __name__)
 
 
-@dashboard_bp.route("/")
+@dashboard_bp.route("/app")
 @login_required
 def index():
     user_id = current_user_id()

@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}{{ APP_NAME }}｜複数のGoogleフォームの回答を1か所で管理する無料ツール{% endblock %}
+
+{% block description %}<meta name="description" content="複数のGoogleフォームに届いた回答を1つの受信箱にまとめて確認できる無料ツールです。未対応・対応中・対応済みの状況管理、メモ、検索に対応。フォームのURLを貼るだけで使えます。">{% endblock %}
+
+{% block canonical %}<link rel="canonical" href="{{ absolute_url('public.landing') }}">{% endblock %}
+
+{% block head_extra %}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ APP_NAME }}｜複数のGoogleフォームの回答を1か所で管理">
+  <meta property="og:description" content="複数のGoogleフォームに届いた回答を1つの受信箱にまとめて確認できる無料ツール。対応状況の管理とメモに対応。">
+  <meta property="og:url" content="{{ absolute_url('public.landing') }}">
+  <meta property="og:image" content="{{ absolute_url('static', filename='img/icon-192.png') }}">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "{{ APP_NAME }}",
+    "url": "{{ absolute_url('public.landing') }}",
+    "description": "複数のGoogleフォームに届いた回答を1つの受信箱にまとめて確認・管理できる無料のWebアプリ。",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" }
+  }
+  </script>
+{% endblock %}
+
+{% block body %}
+<header class="lp-header">
+  <div class="lp-container lp-header-inner">
+    <a href="{{ url_for('public.landing') }}" class="lp-brand">
+      <img src="{{ url_for('static', filename='img/app-icon-64.png') }}" alt="" width="28" height="28">
+      <span>{{ APP_NAME }}</span>
+    </a>
+    {% if logged_in %}
+      <a href="{{ url_for('dashboard.index') }}" class="lp-header-cta">受信箱へ</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="lp-header-cta">はじめる</a>
+    {% endif %}
+  </div>
+</header>
+
+<main>
+  <section class="lp-hero">
+    <div class="lp-container">
+      <h1>フォームが増えるほど、回答は見落とされる</h1>
+      <p class="lp-lead">
+        {{ APP_NAME }}は、複数のGoogleフォームに届いた回答を<strong>1つの受信箱</strong>にまとめて確認できる無料ツールです。
+        どれに返事をしたかを記録しながら、対応漏れを防げます。
+      </p>
+      {% if logged_in %}
+        <a href="{{ url_for('dashboard.index') }}" class="lp-cta">受信箱を開く</a>
+        <p class="lp-note">ログイン済みです。</p>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="lp-cta">Googleアカウントで無料ではじめる</a>
+        <p class="lp-note">インストール不要。フォームの作成・編集・削除は行いません。</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="lp-section">
+    <div class="lp-container">
+      <h2>こんな手間を無くします</h2>
+      <div class="lp-problems">
+        <div class="lp-problem">
+          <h3>フォームの数だけ確認先がある</h3>
+          <p>問い合わせ用、申込用、アンケート用。フォームごとにスプレッドシートを開いて、前回どこまで見たかを思い出すところから始まる。</p>
+        </div>
+        <div class="lp-problem">
+          <h3>返事をしたか分からなくなる</h3>
+          <p>回答の一覧を見ても、対応済みかどうかは書かれていない。結局、自分の記憶か別のメモを頼ることになる。</p>
+        </div>
+        <div class="lp-problem">
+          <h3>新しい回答に気づけない</h3>
+          <p>通知メールを切っていると届いたことに気づかず、切らなければ他のメールに埋もれる。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section lp-section-alt">
+    <div class="lp-container">
+      <h2>できること</h2>
+      <div class="lp-features">
+        <div class="lp-feature">
+          <h3>複数フォームを1つの受信箱へ</h3>
+          <p>登録したフォームの回答を時系列にまとめて表示します。どのフォームに届いたものかはラベルで分かります。</p>
+        </div>
+        <div class="lp-feature">
+          <h3>対応状況を4段階で管理</h3>
+          <p>未対応・対応中・対応済み・保留を回答ごとに設定できます。絞り込みで「未対応だけ」を出せます。</p>
+        </div>
+        <div class="lp-feature">
+          <h3>既読と重要フラグ</h3>
+          <p>未読の回答は色分けして表示。あとで見返したいものには重要マークを付けられます。</p>
+        </div>
+        <div class="lp-feature">
+          <h3>回答ごとのメモ</h3>
+          <p>「電話で折り返した」「担当に転送済み」といった対応の記録を、回答に紐づけて残せます。</p>
+        </div>
+        <div class="lp-feature">
+          <h3>検索と絞り込み</h3>
+          <p>回答の中身から検索できます。フォーム別・対応状況別の絞り込みと組み合わせられます。</p>
+        </div>
+        <div class="lp-feature">
+          <h3>新着の自動取り込み</h3>
+          <p>フォームに新しい回答が届くと受信箱へ取り込みます。手動での同期もできます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section">
+    <div class="lp-container">
+      <h2>使いはじめる手順</h2>
+      <ol class="lp-steps">
+        <li>
+          <h3>Googleアカウントでログインする</h3>
+          <p>パスワードの登録は不要です。フォームを作ったアカウントでログインしてください。</p>
+        </li>
+        <li>
+          <h3>フォームのURLを貼って登録する</h3>
+          <p>Googleフォームの<strong>編集画面のURL</strong>をコピーして貼るだけです。回答用URLや短縮URL（forms.gle）は別のIDのため、貼った時点で理由を表示して止めます。</p>
+        </li>
+        <li>
+          <h3>受信箱で確認する</h3>
+          <p>登録したフォームの回答が一覧に並びます。対応したものから状況を変えていけば、未対応だけが残ります。</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="lp-section lp-section-alt">
+    <div class="lp-container lp-narrow">
+      <h2>権限について</h2>
+      <p>{{ APP_NAME }}がGoogleに求める権限は、<strong>読み取り専用のものだけ</strong>です。</p>
+      <ul class="lp-list">
+        <li><strong>登録したフォームの質問内容</strong>（どの質問への回答かを表示するため）</li>
+        <li><strong>登録したフォームの回答</strong>（受信箱に表示するため）</li>
+        <li>アカウントの名前・メールアドレス（本人確認と画面表示のため）</li>
+      </ul>
+      <p>
+        フォームの作成・編集・削除、回答の送信は行いません。Googleドライブ全体を見る権限も求めません。
+        回答データはログインしたご本人の画面にのみ表示され、第三者に共有されることはありません。
+        詳細は<a href="{{ url_for('auth.privacy') }}">プライバシーポリシー</a>をご確認ください。
+      </p>
+    </div>
+  </section>
+
+  <section class="lp-section">
+    <div class="lp-container lp-narrow">
+      <h2>こんな場面で使えます</h2>
+      <ul class="lp-list">
+        <li>問い合わせフォームと見積依頼フォームを別々に運用している</li>
+        <li>イベントやサークルの申込を、回ごとに新しいフォームで受け付けている</li>
+        <li>複数人で回答を確認するが、誰が対応したか分からなくなる</li>
+        <li>アンケートの自由記述を読みながら、対応が必要なものだけ拾いたい</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="lp-final">
+    <div class="lp-container">
+      <h2>無料で使えます</h2>
+      <p>登録料も利用料もかかりません。Googleアカウントがあればすぐに始められます。</p>
+      <a href="{{ url_for('auth.login') }}" class="lp-cta">Googleアカウントで無料ではじめる</a>
+    </div>
+  </section>
+</main>
+
+<footer class="lp-footer">
+  <div class="lp-container">
+    <nav class="lp-footer-links">
+      <a href="{{ url_for('auth.terms') }}">利用規約</a>
+      <a href="{{ url_for('auth.privacy') }}">プライバシーポリシー</a>
+      <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener noreferrer">お問い合わせ</a>
+      <a href="https://webtool-labs.com/operator.html" target="_blank" rel="noopener noreferrer">運営者情報</a>
+      <a href="https://webtool-labs.com/" target="_blank" rel="noopener noreferrer">RakuYade</a>
+    </nav>
+    <p class="lp-copyright">{{ APP_NAME }} — RakuYade</p>
+  </div>
+</footer>
+{% endblock %}

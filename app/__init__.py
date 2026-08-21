@@ -20,10 +20,12 @@ def create_app():
     csrf.init_app(app)
 
     from .auth.routes import auth_bp
+    from .public.routes import absolute_url, public_bp
     from .dashboard.routes import dashboard_bp
     from .forms.routes import forms_bp
     from .responses.routes import responses_bp
 
+    app.register_blueprint(public_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(forms_bp)
@@ -54,6 +56,7 @@ def create_app():
             "CONTACT_FORM_URL": CONTACT_FORM_URL,
             "STATUS_LABELS": STATUS_LABELS,
             "MOCK_MODE": app.config.get("MOCK_MODE", False),
+            "absolute_url": absolute_url,
         }
 
     _register_error_handlers(app)

@@ -1,0 +1,267 @@
+/* ============================================================
+   返事きたで - 紹介ページ（/）専用
+   style.cssの変数を引き継ぐ。アプリ本体の画面には影響しない
+   ============================================================ */
+
+.lp-container {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.lp-narrow { max-width: 720px; }
+
+/* --- ヘッダー --- */
+
+.lp-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.lp-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+
+.lp-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.lp-header-cta {
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.lp-header-cta:hover { background: var(--accent-hover); }
+
+/* --- ヒーロー --- */
+
+.lp-hero {
+  background: linear-gradient(180deg, var(--accent-light), var(--bg));
+  padding: 72px 0 64px;
+  text-align: center;
+}
+
+.lp-hero h1 {
+  margin: 0 0 20px;
+  font-size: 34px;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.lp-lead {
+  max-width: 640px;
+  margin: 0 auto 32px;
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--text-sub);
+}
+
+.lp-lead strong { color: var(--text); }
+
+.lp-cta {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.25);
+}
+
+.lp-cta:hover { background: var(--accent-hover); }
+
+.lp-note {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+/* --- セクション共通 --- */
+
+.lp-section { padding: 64px 0; }
+.lp-section-alt { background: var(--surface); }
+
+.lp-section h2,
+.lp-final h2 {
+  margin: 0 0 32px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.lp-narrow h2 { text-align: left; }
+
+/* --- 課題・機能のカード --- */
+
+.lp-problems,
+.lp-features {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.lp-problem,
+.lp-feature {
+  padding: 22px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.lp-section-alt .lp-feature { background: var(--bg); }
+
+.lp-problem h3,
+.lp-feature h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.lp-problem p,
+.lp-feature p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--text-sub);
+}
+
+/* --- 手順 --- */
+
+.lp-steps {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  counter-reset: lp-step;
+}
+
+.lp-steps li {
+  position: relative;
+  padding: 0 0 28px 56px;
+  counter-increment: lp-step;
+}
+
+.lp-steps li::before {
+  content: counter(lp-step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.lp-steps li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 40px;
+  bottom: 6px;
+  border-left: 2px dotted var(--border);
+}
+
+.lp-steps h3 {
+  margin: 6px 0 8px;
+  font-size: 16px;
+}
+
+.lp-steps p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--text-sub);
+}
+
+/* --- 箇条書き --- */
+
+.lp-list {
+  margin: 0 0 20px;
+  padding-left: 22px;
+  line-height: 2;
+  color: var(--text-sub);
+}
+
+.lp-list strong { color: var(--text); }
+
+.lp-narrow p {
+  line-height: 1.95;
+  color: var(--text-sub);
+}
+
+/* --- 締めのCTA --- */
+
+.lp-final {
+  padding: 64px 0 72px;
+  background: var(--accent-light);
+  text-align: center;
+}
+
+.lp-final p {
+  margin: 0 0 28px;
+  color: var(--text-sub);
+}
+
+/* --- フッター --- */
+
+.lp-footer {
+  padding: 32px 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.lp-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.lp-footer-links a {
+  font-size: 13px;
+  color: var(--text-sub);
+  text-decoration: none;
+}
+
+.lp-footer-links a:hover { color: var(--accent); }
+
+.lp-copyright {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+/* --- スマートフォン --- */
+
+@media (max-width: 600px) {
+  .lp-hero { padding: 48px 0 44px; }
+  .lp-hero h1 { font-size: 26px; }
+  .lp-section { padding: 48px 0; }
+  .lp-section h2, .lp-final h2 { font-size: 21px; }
+  .lp-cta { display: block; padding: 15px 20px; }
+}
