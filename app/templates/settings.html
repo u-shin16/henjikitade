@@ -1,32 +1,82 @@
 {% extends "base.html" %}
 {% block title %}設定 - {{ APP_NAME }}{% endblock %}
-{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
 {% block body %}
 <div class="app-shell">
-  {% with active = 'settings' %}{% include "_app_nav.html" %}{% endwith %}
+  <header class="app-header">
+    <div class="header-left">
+      <a href="{{ url_for('dashboard.index') }}" class="back-link">← 受信箱へ</a>
+      <span class="app-name">設定</span>
+    </div>
+    <div class="header-right">
+      <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener" class="sidebar-link">お問い合わせ</a>
+    </div>
+  </header>
 
-  {# アカウント情報とアカウント削除は「アカウント」タブへ移した。
-     管理対象フォームの一覧は「フォーム」タブと重複していたため置いていない。 #}
   <div class="page-body page-narrow">
     <div class="settings-card">
-      <h2>件数の再計算</h2>
+      <h2>アカウント</h2>
+      {% if user %}
+      <div class="account-row">
+        {% if user.picture_url %}
+        <img src="{{ user.picture_url }}" alt="" class="account-avatar" referrerpolicy="no-referrer">
+        {% endif %}
+        <div>
+          <div class="account-name">{{ user.name }}</div>
+          <div class="account-email">{{ user.email }}</div>
+        </div>
+      </div>
+      {% else %}
+      <p>アカウント情報を取得できませんでした。</p>
+      {% endif %}
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost">ログアウト</a>
+    </div>
+
+    <div class="settings-card">
+      <h2>管理対象フォーム</h2>
+      {% if managed_forms %}
+      <ul class="settings-form-list">
+        {% for form in managed_forms %}
+        <li>
+          {{ form.title }}
+          {% if form.is_active %}
+          <span class="badge badge-active">管理中</span>
+          {% else %}
+          <span class="badge badge-muted">停止中</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>管理対象のフォームが登録されていません。</p>
+      {% endif %}
+      <a href="{{ url_for('forms.forms_page') }}" class="btn btn-ghost">フォーム管理へ</a>
+    </div>
+
+    <div class="settings-card">
+      <h2>メンテナンス</h2>
       <p>未読・未対応などの件数表示が実際と合わない場合は、件数を数え直すことができます。</p>
       <button id="recalculate-btn" class="btn btn-primary">件数を再計算する</button>
     </div>
 
     <div class="settings-card">
       <h2>お問い合わせ</h2>
-      <p>不具合の報告や要望はこちらから受け付けています。</p>
       <a href="{{ CONTACT_FORM_URL }}" target="_blank" rel="noopener" class="btn btn-ghost">問い合わせフォームを開く</a>
     </div>
 
     <div class="settings-card">
       <h2>規約・法的情報</h2>
+      <p>本アプリはRakuYadeブランドの共通ページを利用しています。</p>
       <div class="settings-legal-links">
         <a href="{{ url_for('auth.terms') }}" class="btn btn-ghost">利用規約</a>
         <a href="{{ url_for('auth.privacy') }}" class="btn btn-ghost">プライバシーポリシー</a>
         <a href="https://webtool-labs.com/operator.html" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">運営者情報</a>
       </div>
+    </div>
+
+    <div class="settings-card danger-zone">
+      <h2>アカウント削除</h2>
+      <p>本アプリに保存した管理フォーム、回答、メモ、設定をすべて削除します。この操作は取り消せません。</p>
+      <button id="account-delete-btn" class="btn btn-danger">アカウントを削除</button>
     </div>
   </div>
 </div>
@@ -40,6 +90,26 @@ document.getElementById("recalculate-btn").addEventListener("click", async (e) =
   const result = await Api.post("/api/forms/recalculate");
   showToast(result.message, result.success ? "success" : "error");
   btn.disabled = false;
+});
+
+document.getElementById("account-delete-btn").addEventListener("click", async (e) => {
+  const confirmed = window.confirm(
+    "⚠️ アカウントを削除しますか？\nこの操作は取り消せません。本アプリに保存したフォーム・回答・設定もすべて削除されます。"
+  );
+  if (!confirmed) return;
+
+  const btn = e.currentTarget;
+  btn.disabled = true;
+  btn.textContent = "削除しています…";
+  const result = await Api.post("/api/account/delete");
+  if (result.success) {
+    window.location.href = result.data.redirect_url;
+    return;
+  }
+
+  showToast(result.message, "error");
+  btn.disabled = false;
+  btn.textContent = "アカウントを削除";
 });
 </script>
 {% endblock %}
