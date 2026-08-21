@@ -129,6 +129,27 @@ class MockManagedFormRepository:
         route = self.store.setdefault("watch_routes", {}).get(watch_id)
         return copy.deepcopy(route) if route else None
 
+    def delete_form(self, user_id, form_id):
+        forms = self._forms(user_id)
+        if form_id not in forms:
+            return False
+        del forms[form_id]
+        # 回答も一緒に消す（本番のrecursive_deleteに合わせる）。
+        # 残すと、同じフォームを登録し直したときに古い回答が復活する。
+        self.store.get("responses", {}).get(user_id, {}).pop(form_id, None)
+        return True
+
+    def delete_watch_routes_for_form(self, user_id, form_id):
+        routes = self.store.setdefault("watch_routes", {})
+        targets = [
+            watch_id
+            for watch_id, route in routes.items()
+            if route.get("user_id") == user_id and route.get("form_id") == form_id
+        ]
+        for watch_id in targets:
+            del routes[watch_id]
+        return len(targets)
+
     def delete_watch_routes_for_user(self, user_id):
         routes = self.store.setdefault("watch_routes", {})
         targets = [

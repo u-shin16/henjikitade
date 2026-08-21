@@ -95,6 +95,38 @@ class ManagedFormRepository:
         data["watch_id"] = snap.id
         return data
 
+    def delete_form(self, user_id, form_id):
+        """フォームと、その配下に保存した回答をまとめて削除する。
+
+        文書だけ消すと responses サブコレクションが孤立して残り、同じフォームを
+        登録し直したときに古い回答が復活する。必ず再帰的に消す。
+        """
+        doc = self._col(user_id).document(form_id)
+        if not doc.get().exists:
+            return False
+        get_db().recursive_delete(doc)
+        return True
+
+    def delete_watch_routes_for_form(self, user_id, form_id):
+        """このフォームに紐づくPub/Sub通知経路を削除する。
+
+        user_idの単一条件で引いてからPython側で絞る。等価2条件のクエリにすると
+        複合インデックスが必要になる場合があり、経路が消せないと
+        削除済みフォームへの通知だけが残り続けるため、確実な方を採る。
+        """
+        from google.cloud.firestore_v1.base_query import FieldFilter
+
+        deleted = 0
+        query = self._watch_routes_col().where(
+            filter=FieldFilter("user_id", "==", user_id)
+        )
+        for snap in query.stream():
+            if (snap.to_dict() or {}).get("form_id") != form_id:
+                continue
+            snap.reference.delete()
+            deleted += 1
+        return deleted
+
     def delete_watch_routes_for_user(self, user_id):
         """退会ユーザーに紐づくPub/Sub通知経路をすべて削除する。"""
         from google.cloud.firestore_v1.base_query import FieldFilter

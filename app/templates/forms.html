@@ -82,6 +82,7 @@
               {% if row.web_view_link %}
               <a href="{{ row.web_view_link }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">フォームを開く</a>
               {% endif %}
+              <button class="btn btn-ghost btn-sm delete-btn" data-response-count="{{ row.response_count }}">削除</button>
             </td>
           </tr>
           {% endfor %}

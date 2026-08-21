@@ -105,6 +105,26 @@ def stop_response_watches(user_id, credentials):
     return {"stopped": stopped, "failed": failed}
 
 
+def stop_response_watch(user_id, form_id, credentials):
+    """1つのフォームのwatchだけを停止する。
+
+    フォームを削除する前に呼ぶ。先にFirestoreを消すとwatch_idが分からなくなり、
+    Google側のwatchが宙に浮いたまま7日間残る。
+    """
+    if current_app.config.get("MOCK_MODE"):
+        return False
+
+    _, form_repo, _ = get_repositories()
+    form = form_repo.get_form(user_id, form_id)
+    if not form:
+        return False
+    watch_id = form.get("response_watch_id")
+    if not watch_id:
+        return False
+    google_forms_api.delete_watch(credentials, form_id, watch_id)
+    return True
+
+
 def _ensure_one_watch(credentials, form_repo, user_id, form, topic_name):
     form_id = form["form_id"]
     watch_id = form.get("response_watch_id")

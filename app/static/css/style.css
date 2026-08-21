@@ -691,6 +691,14 @@ body:has(.mock-banner) .app-shell { height: calc(100vh - 25px); }
 .onboarding-card h2 { font-size: 16px; color: var(--accent-hover); }
 .onboarding-card p { margin: 0; font-size: 13px; }
 
+/* 削除は取り消せないので、他の操作と見分けがつく色にする */
+.forms-table .delete-btn { color: var(--danger); }
+.forms-table .delete-btn:hover:not(:disabled) {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
+
 .form-add-card {
   background: var(--surface);
   border: 1px solid var(--border);

@@ -182,6 +182,70 @@ def set_form_active(form_id):
     return jsonify({"success": True, "message": message, "data": {"is_active": is_active}})
 
 
+@forms_bp.route("/api/forms/<form_id>/delete", methods=["POST"])
+@login_required
+def delete_managed_form(form_id):
+    """フォームの登録を、保存済みの回答ごと完全に削除する。
+
+    「管理対象から外す」(set_active)はデータを残す操作で、間違えて登録した
+    フォームが一覧に残り続ける。こちらは元に戻せない削除。
+    """
+    user_id = current_user_id()
+    if not _is_valid_id(form_id):
+        return jsonify({"success": False, "message": "フォームが見つかりませんでした"}), 404
+
+    user_repo, form_repo, _ = get_repositories()
+
+    try:
+        form = form_repo.get_form(user_id, form_id)
+    except FirebaseConfigError:
+        logger.exception("フォームの取得に失敗しました")
+        return jsonify({"success": False, "message": "データベースへの接続に失敗しました"}), 500
+
+    if form is None:
+        return jsonify({"success": False, "message": "フォームが見つかりませんでした"}), 404
+
+    title = form.get("title") or "無題のフォーム"
+
+    # Firestoreを先に消すとwatch_idが分からなくなり、Google側のwatchが
+    # 宙に浮いたまま残る。停止を先に試す。
+    if not current_app.config.get("MOCK_MODE"):
+        try:
+            credentials = get_user_credentials(user_repo, user_id)
+            watch_service.stop_response_watch(user_id, form_id, credentials)
+        except ReauthRequired:
+            logger.info("削除時のGoogle認証が切れています (user=%s)", user_id)
+        except Exception:
+            # watchは最長7日で失効するため、停止できなくても削除は進める
+            logger.warning(
+                "削除時のフォームwatch停止に失敗しました (form_id=%s)", form_id, exc_info=True
+            )
+
+    try:
+        # 通知経路を先に消す。フォームだけ消して経路が残ると、
+        # 届いた通知が存在しないフォームを指したままになる。
+        form_repo.delete_watch_routes_for_form(user_id, form_id)
+        deleted = form_repo.delete_form(user_id, form_id)
+    except FirebaseConfigError:
+        logger.exception("フォームの削除に失敗しました (form_id=%s)", form_id)
+        return jsonify({"success": False, "message": "データベースへの接続に失敗しました"}), 500
+    except Exception:
+        logger.exception("フォームの削除に失敗しました (form_id=%s)", form_id)
+        return jsonify({
+            "success": False,
+            "message": "削除に失敗しました。時間を空けて再度お試しください",
+        }), 500
+
+    if not deleted:
+        return jsonify({"success": False, "message": "フォームが見つかりませんでした"}), 404
+
+    return jsonify({
+        "success": True,
+        "message": f"「{title}」の登録を削除しました",
+        "data": {"form_id": form_id},
+    })
+
+
 @forms_bp.route("/api/sync", methods=["POST"])
 @login_required
 def sync_responses():
